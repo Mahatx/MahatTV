@@ -1,3 +1,7 @@
+import { Capacitor } from '@capacitor/core';
+import { App as CapApp } from '@capacitor/app';
+import { StatusBar, Style } from '@capacitor/status-bar';
+
 /**
  * Ponte de Plataforma do MahatTV (Web / Electron Desktop / Capacitor Mobile).
  * Isola APIs específicas de cada ambiente para que a UI seja 100% compartilhada.
@@ -7,8 +11,12 @@ function detectPlatform() {
     if (window.mahatDesktop || navigator.userAgent.toLowerCase().includes('electron')) {
       return 'electron';
     }
-    if (window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform()) {
-      return 'capacitor';
+    try {
+      if (Capacitor && typeof Capacitor.isNativePlatform === 'function' && Capacitor.isNativePlatform()) {
+        return 'capacitor';
+      }
+    } catch {
+      // Ambiente web padrão
     }
   }
   return 'web';
@@ -23,6 +31,10 @@ export const platformBridge = {
 
   isMobileNative() {
     return this.platform === 'capacitor';
+  },
+
+  isStandaloneMobile() {
+    return this.isMobileNative() && !this.getApiBaseUrl();
   },
 
   getApiBaseUrl() {
@@ -41,10 +53,36 @@ export const platformBridge = {
   },
 
   setCustomApiBaseUrl(url) {
-    if (!url) {
+    const clean = String(url || '').trim().replace(/\/+$/, '');
+    if (!clean) {
       localStorage.removeItem('mahattv_api_base');
     } else {
-      localStorage.setItem('mahattv_api_base', url.replace(/\/+$/, ''));
+      localStorage.setItem('mahattv_api_base', clean);
+    }
+  },
+
+  async initNativeMobile({ onBackButton } = {}) {
+    if (!this.isMobileNative()) return;
+    document.body.classList.add('platform-mobile-native');
+
+    try {
+      await StatusBar.setStyle({ style: Style.Dark });
+      await StatusBar.setBackgroundColor({ color: '#060913' });
+    } catch {
+      // StatusBar opcional
+    }
+
+    if (typeof onBackButton === 'function') {
+      try {
+        CapApp.addListener('backButton', ({ canGoBack }) => {
+          const handled = onBackButton();
+          if (!handled && !canGoBack) {
+            CapApp.minimizeApp();
+          }
+        });
+      } catch {
+        // Ignorar se plugin indisponível
+      }
     }
   },
 

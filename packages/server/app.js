@@ -27,6 +27,15 @@ function createAppServer(options = {}) {
 
   const server = http.createServer(async (req, res) => {
     try {
+      if (req.method === 'OPTIONS') {
+        res.writeHead(204, {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Range'
+        });
+        return res.end();
+      }
+
       const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
       const pathname = parsedUrl.pathname;
 

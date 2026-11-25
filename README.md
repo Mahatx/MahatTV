@@ -56,6 +56,18 @@ npm run build:desktop
 ```
 *(Os executáveis são gerados em `release/` — para gerar apenas a pasta desempacotada rápida em `release/win-unpacked/MahatTV.exe`, use `npm run build:desktop:dir`.)*
 
+### 📱 Aplicativo Mobile (Android / Capacitor)
+```powershell
+# Sincronizar build da UI para o projeto nativo Android
+npm run mobile:sync
+
+# Abrir projeto Android no Android Studio para gerar o APK
+npm run mobile:android
+```
+* **Modo Autônomo (Standalone)**: funciona direto no celular usando `CapacitorHttp` nativo (sem CORS).
+* **Modo Cliente LAN (Wi-Fi)**: em **⚙️ Configurações → Servidor na Rede Local**, informe o IP do seu PC rodando `npm start` (ex.: `http://192.168.0.10:3000`) para usar o proxy, EPG completo e canais verificados do PC.
+* **APK automático na nuvem (sem instalar Android Studio)**: o workflow [`.github/workflows/build-android.yml`](./.github/workflows/build-android.yml) compila o `app-debug.apk` automaticamente na aba **Actions** do GitHub!
+
 Após iniciar, acesse: 👉 **http://localhost:3000**
 
 > Na primeira execução em um clone limpo, o **GitHub Sync** detecta automaticamente que `storage/playlists/` está vazia e permite baixar todas as listas `.m3u8` em 1 clique (ou automaticamente se o Auto-Update estiver ativado).
@@ -88,14 +100,20 @@ MahatTV/
 │           ├── features/              # catalog, player, epg, tvMode, settings, scanner, githubSync
 │           └── styles/                # tokens, layout, panels, player, epg, settings, tv-mode, responsive
 ├── apps/
-│   └── desktop/                       # Aplicativo Desktop Windows/Linux/macOS (Electron)
-│       ├── main.js                    # Processo principal + servidor embarcado + userData
-│       ├── preload.js                 # Ponte segura IPC (window.mahatDesktop)
-│       ├── electron-builder.yml       # Configuração do instalador Windows (.exe / Portable)
-│       └── build/                     # Ícones oficiais (icon.ico / icon.png)
+│   ├── desktop/                       # Aplicativo Desktop Windows/Linux/macOS (Electron)
+│   │   ├── main.js                    # Processo principal + servidor embarcado + userData
+│   │   ├── preload.js                 # Ponte segura IPC (window.mahatDesktop)
+│   │   ├── electron-builder.yml       # Configuração do instalador Windows (.exe / Portable)
+│   │   └── build/                     # Ícones oficiais (icon.ico / icon.png)
+│   └── mobile/
+│       └── android/                   # Projeto nativo Android (Capacitor + ícones + cleartext HTTP)
+├── capacitor.config.json              # Configuração Capacitor (Android/iOS + CapacitorHttp nativo)
+├── .github/workflows/
+│   └── build-android.yml              # Build automático do APK Android via GitHub Actions
 ├── scripts/
 │   ├── dev.js                         # Dev integrado (Vite watch + Node server watch)
-│   └── desktop.js                     # Launcher Electron seguro para terminais de IDE
+│   ├── desktop.js                     # Launcher Electron seguro para terminais de IDE
+│   └── mobile.js                      # Helper Capacitor CLI (sync / open)
 └── storage/                           # Dados locais em runtime (ignorado no Git)
     ├── playlists/                     # Listas .m3u8 e Canais-Online.m3u8
     └── data/                          # verified-streams.json, epg-cache.json, favorites.json

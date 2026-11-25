@@ -7,6 +7,7 @@ import './styles/main.css';
 
 import { state } from './state/store.js';
 import { queryDomElements } from './state/dom.js';
+import { platformBridge } from './services/platformBridge.js';
 import { createScannerController } from './features/scanner/scannerController.js';
 import { createGithubSyncController } from './features/githubSync/githubSyncController.js';
 import { createPlayerController } from './features/player/playerController.js';
@@ -111,6 +112,29 @@ document.addEventListener('DOMContentLoaded', async () => {
   epg.bindEvents();
   tvMode.bindEvents();
   settings.bindEvents();
+
+  // Integração nativa Mobile (StatusBar + botão Voltar do Android)
+  platformBridge.initNativeMobile({
+    onBackButton: () => {
+      if (els.settingsModalBackdrop && !els.settingsModalBackdrop.classList.contains('hidden')) {
+        settings.closeSettingsModal();
+        return true;
+      }
+      if (document.body.classList.contains('tv-overlay-open')) {
+        tvMode.setTvOverlayOpen(false);
+        return true;
+      }
+      if (document.body.classList.contains('tv-active')) {
+        tvMode.exitTvAndStopPlayer();
+        return true;
+      }
+      if (els.sidebar && els.sidebar.classList.contains('open')) {
+        catalog.toggleMobileSidebar(false);
+        return true;
+      }
+      return false;
+    }
+  });
 
   // Carga inicial
   catalog.syncFavoritesToServer();

@@ -15,14 +15,21 @@
     "desktop": "npm run build:ui && node scripts/desktop.js",
     "desktop:dev": "node scripts/desktop.js",
     "build:desktop": "npm run build:ui && electron-builder --config apps/desktop/electron-builder.yml",
-    "build:desktop:dir": "npm run build:ui && electron-builder --dir --config apps/desktop/electron-builder.yml"
+    "build:desktop:dir": "npm run build:ui && electron-builder --dir --config apps/desktop/electron-builder.yml",
+    "mobile:sync": "npm run build:ui && node scripts/mobile.js sync",
+    "mobile:android": "npm run build:ui && node scripts/mobile.js open android"
   },
   "dependencies": {
+    "@capacitor/app": "^7.0.1",
+    "@capacitor/core": "^7.2.0",
+    "@capacitor/status-bar": "^7.0.1",
     "@fontsource/plus-jakarta-sans": "^5.2.5",
     "hls.js": "^1.5.15",
     "mpegts.js": "^1.7.3"
   },
   "devDependencies": {
+    "@capacitor/android": "^7.2.0",
+    "@capacitor/cli": "^7.2.0",
     "electron": "^35.1.5",
     "electron-builder": "^25.1.8",
     "vite": "^6.2.0"

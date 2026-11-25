@@ -1,0 +1,30 @@
+{
+  "appId": "com.mahatx.mahattv",
+  "appName": "MahatTV",
+  "webDir": "packages/ui/dist",
+  "server": {
+    "androidScheme": "http",
+    "cleartext": true
+  },
+  "android": {
+    "path": "apps/mobile/android",
+    "backgroundColor": "#060913",
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": true
+  },
+  "ios": {
+    "path": "apps/mobile/ios",
+    "backgroundColor": "#060913",
+    "contentInset": "automatic"
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#060913"
+    }
+  }
+}

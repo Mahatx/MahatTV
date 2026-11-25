@@ -1,4 +1,5 @@
 import { apiClient } from '../../services/apiClient.js';
+import { platformBridge } from '../../services/platformBridge.js';
 
 export function createSettingsController({
   state,
@@ -186,6 +187,48 @@ export function createSettingsController({
       els.cfgDesktopTools.classList.remove('hidden');
       els.cfgOpenPlaylistsFolderBtn.addEventListener('click', () => {
         window.mahatDesktop.openPlaylistsFolder();
+      });
+    }
+
+    // Configuração de Servidor LAN (Mobile / Wi-Fi)
+    if (els.cfgServerUrlInput) {
+      els.cfgServerUrlInput.value = localStorage.getItem('mahattv_api_base') || '';
+    }
+    const showServerStatus = (msg, isErr = false) => {
+      if (!els.cfgServerStatusMsg) return;
+      els.cfgServerStatusMsg.textContent = msg;
+      els.cfgServerStatusMsg.classList.remove('hidden');
+      els.cfgServerStatusMsg.classList.toggle('is-error', isErr);
+    };
+    if (els.cfgTestServerBtn && els.cfgServerUrlInput) {
+      els.cfgTestServerBtn.addEventListener('click', async () => {
+        const val = els.cfgServerUrlInput.value.trim();
+        if (!val) {
+          showServerStatus('Modo padrão/autônomo selecionado (nenhum servidor LAN informado).');
+          return;
+        }
+        showServerStatus('Testando conexão com o servidor MahatTV...');
+        try {
+          const info = await apiClient.checkHealth(val);
+          showServerStatus(
+            `✅ Conectado ao ${info.app || 'MahatTV'}! (${info.playlistsCount || 0} listas • ${info.verifiedOnline || 0} canais online)`
+          );
+        } catch (err) {
+          showServerStatus(`❌ Não foi possível conectar em ${val} (${err.message}).`, true);
+        }
+      });
+    }
+    if (els.cfgSaveServerBtn && els.cfgServerUrlInput) {
+      els.cfgSaveServerBtn.addEventListener('click', () => {
+        platformBridge.setCustomApiBaseUrl(els.cfgServerUrlInput.value.trim());
+        window.location.reload();
+      });
+    }
+    if (els.cfgResetServerBtn && els.cfgServerUrlInput) {
+      els.cfgResetServerBtn.addEventListener('click', () => {
+        els.cfgServerUrlInput.value = '';
+        platformBridge.setCustomApiBaseUrl('');
+        window.location.reload();
       });
     }
   }

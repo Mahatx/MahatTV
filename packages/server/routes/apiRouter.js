@@ -40,6 +40,18 @@ function createApiRouter(services) {
   const { storageService, playlistService, scannerService, epgService, githubSyncService } = services;
 
   return async function handleApiRoute(pathname, parsedUrl, req, res) {
+    // 0. Health Check (usado pelo App Mobile para testar conexão LAN com o servidor)
+    if (pathname === '/api/health') {
+      const files = playlistService.getM3u8Files();
+      const summary = scannerService.getScannerSummary();
+      return sendJson(res, 200, {
+        ok: true,
+        app: 'MahatTV',
+        playlistsCount: files.length,
+        verifiedOnline: summary.savedOnlineTotal
+      });
+    }
+
     // 1. Playlists, Categorias e Itens
     if (pathname === '/api/playlists') {
       return sendJson(res, 200, {

@@ -332,6 +332,55 @@ body.ui-simple .player-container {
   padding-top: 4px;
 }
 
+.settings-server-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 13px;
+  border-radius: 15px;
+  background: rgba(30, 41, 59, 0.42);
+  border: 1px solid var(--glass-border);
+}
+
+.settings-server-row {
+  display: flex;
+  gap: 8px;
+}
+
+.settings-server-status {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6ee7b7;
+  padding: 8px 11px;
+  border-radius: 10px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.settings-server-status.is-error {
+  color: #fda4af;
+  background: rgba(244, 63, 94, 0.12);
+  border-color: rgba(244, 63, 94, 0.35);
+}
+
+/* Safe-area nativo para celulares com notch e barra de gestos */
+body.platform-mobile-native .app-layout {
+  padding-top: max(8px, env(safe-area-inset-top));
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+}
+
+body.platform-mobile-native .mobile-bottom-nav {
+  bottom: max(10px, env(safe-area-inset-bottom));
+}
+
+body.platform-mobile-native.ui-simple.tv-active .tv-top-hud {
+  padding-top: max(14px, env(safe-area-inset-top));
+}
+
+body.platform-mobile-native.ui-simple.tv-active .custom-video-controls {
+  bottom: max(14px, env(safe-area-inset-bottom));
+}
+
 @media (max-width: 600px) {
   .mode-cards-grid,
   .settings-tools-grid {

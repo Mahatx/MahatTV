@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MahatTV</string>
+    <string name="title_activity_main">MahatTV</string>
+    <string name="package_name">com.mahatx.mahattv</string>
+    <string name="custom_url_scheme">com.mahatx.mahattv</string>
+</resources>

@@ -147,7 +147,7 @@ export function createPlayerController({
     onChannelStarted(item);
     onLoadChannelEpg(item);
 
-    const useProxy = els.useProxyToggle.checked;
+    const useProxy = els.useProxyToggle.checked && !platformBridge.isStandaloneMobile();
     const useSmartAntiFreeze = els.smartHlsToggle.checked && !forceContinuousTs;
 
     const hideOverlayAndMarkOnline = () => {

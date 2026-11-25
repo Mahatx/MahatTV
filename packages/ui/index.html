@@ -725,6 +725,30 @@
             <button id="cfgOpenPlaylistsFolderBtn" type="button" class="btn-glass-secondary">📂 Abrir Pasta de Listas (.m3u8)</button>
           </div>
         </div>
+
+        <!-- Seção 5: Conexão com Servidor na Rede Local (App Mobile / Wi-Fi) -->
+        <div class="settings-group">
+          <div class="settings-group-title">📱 Servidor na Rede Local (App Mobile / Wi-Fi)</div>
+          <div class="settings-server-box">
+            <p class="settings-row-hint">
+              No celular, você pode usar o <strong>Modo Autônomo</strong> (deixe em branco) ou conectar ao seu PC rodando MahatTV na mesma rede Wi-Fi (ex.: <code>http://192.168.0.10:3000</code>) para aproveitar proxy, EPG completo e canais verificados.
+            </p>
+            <div class="settings-server-row">
+              <input
+                type="url"
+                id="cfgServerUrlInput"
+                class="search-small"
+                placeholder="Ex: http://192.168.0.10:3000 (vazio = padrão/autônomo)"
+              />
+            </div>
+            <div class="settings-inline-actions">
+              <button id="cfgTestServerBtn" type="button" class="btn-glass-secondary">🔍 Testar</button>
+              <button id="cfgSaveServerBtn" type="button" class="btn-glass-primary">💾 Salvar &amp; Reconectar</button>
+              <button id="cfgResetServerBtn" type="button" class="btn-glass-secondary">🧹 Padrão</button>
+            </div>
+            <div id="cfgServerStatusMsg" class="settings-server-status hidden"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
