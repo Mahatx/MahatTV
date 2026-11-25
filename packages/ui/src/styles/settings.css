@@ -1,5 +1,5 @@
-﻿/* =========================================================
-   MODO SIMPLES VS MODO COMPLETO & MODAL DE CONFIGURAÃ‡Ã•ES
+/* =========================================================
+   MODO SIMPLES VS MODO COMPLETO & MODAL DE CONFIGURAÇÕES
    ========================================================= */
 .settings-trigger-btn {
   position: relative;
@@ -17,7 +17,7 @@
   border: 1.5px solid #0b1224;
 }
 
-/* Regras do Modo Simples: remove controles tÃ©cnicos e poluiÃ§Ã£o visual */
+/* Regras do Modo Simples: remove controles técnicos e poluição visual */
 body.ui-simple .complete-only {
   display: none !important;
 }
@@ -37,7 +37,7 @@ body.ui-simple .player-container {
   }
 }
 
-/* Modal de ConfiguraÃ§Ãµes em Vidro (Liquid Glass) */
+/* Modal de Configurações em Vidro (Liquid Glass) */
 .settings-backdrop {
   position: fixed;
   inset: 0;
@@ -124,7 +124,7 @@ body.ui-simple .player-container {
   color: #93c5fd;
 }
 
-/* CartÃµes de SeleÃ§Ã£o Modo Simples vs Completo */
+/* Cartões de Seleção Modo Simples vs Completo */
 .mode-cards-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -210,7 +210,7 @@ body.ui-simple .player-container {
   color: var(--text-secondary);
 }
 
-/* Lista de Toggles nas ConfiguraÃ§Ãµes */
+/* Lista de Toggles nas Configurações */
 .settings-list {
   display: flex;
   flex-direction: column;

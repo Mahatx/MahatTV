@@ -1,5 +1,5 @@
-﻿/* =========================================================
-   GUIA DE PROGRAMAÃ‡ÃƒO (EPG) â€¢ ESTILO LIQUID GLASS
+/* =========================================================
+   GUIA DE PROGRAMAÇÃO (EPG) • ESTILO LIQUID GLASS
    ========================================================= */
 .section-header {
   display: flex;
@@ -214,7 +214,7 @@
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Painel Principal do Guia de ProgramaÃ§Ã£o (Timeline) */
+/* Painel Principal do Guia de Programação (Timeline) */
 .epg-guide-section {
   border-radius: var(--radius-xl);
   padding: 16px;
@@ -272,7 +272,7 @@
   color: var(--text-primary);
 }
 
-/* CartÃ£o de Detalhes do Programa */
+/* Cartão de Detalhes do Programa */
 .epg-detail-card {
   display: flex;
   align-items: center;
@@ -365,7 +365,7 @@
   flex-direction: column;
 }
 
-/* CabeÃ§alho fixo com RÃ©gua de HorÃ¡rios */
+/* Cabeçalho fixo com Régua de Horários */
 .epg-ruler-row {
   display: flex;
   position: sticky;

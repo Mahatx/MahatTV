@@ -1,12 +1,12 @@
+import { platformBridge } from './platformBridge.js';
+
 /**
  * Camada de abstração de API do MahatTV.
- * Permite apontar para o servidor local (Web/Desktop Electron) ou,
- * futuramente, para uma bridge nativa / servidor na LAN (Mobile Capacitor).
+ * Usa platformBridge para resolver a base dinamicamente entre Web, Electron Desktop e Capacitor Mobile.
  */
-const API_BASE = window.__MAHATTV_API_BASE__ || '';
-
 async function requestJson(path, options) {
-  const res = await fetch(`${API_BASE}${path}`, options);
+  const base = platformBridge.getApiBaseUrl();
+  const res = await fetch(`${base}${path}`, options);
   return res.json();
 }
 
@@ -41,6 +41,8 @@ export const apiClient = {
   getChannelEpg: (name, tvgId) =>
     requestJson(`/api/epg/channel?${new URLSearchParams({ name: name || '', tvgId: tvgId || '' }).toString()}`),
 
-  buildProxyUrl: (url, { continuous = false } = {}) =>
-    `${API_BASE}/api/proxy?url=${encodeURIComponent(url)}${continuous ? '&continuous=1' : ''}`
+  buildProxyUrl: (url, { continuous = false } = {}) => {
+    const base = platformBridge.getApiBaseUrl();
+    return `${base}/api/proxy?url=${encodeURIComponent(url)}${continuous ? '&continuous=1' : ''}`;
+  }
 };

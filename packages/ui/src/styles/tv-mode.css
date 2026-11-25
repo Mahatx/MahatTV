@@ -1,5 +1,5 @@
-﻿/* =========================================================
-   MODO TV IMERSIVO (MODO SIMPLES COM CANAL ABERTO) + SOBREPOSIÃ‡ÃƒO UNIFICADA
+/* =========================================================
+   MODO TV IMERSIVO (MODO SIMPLES COM CANAL ABERTO) + SOBREPOSIÇÃO UNIFICADA
    ========================================================= */
 .browse-workspace {
   display: contents;
@@ -12,12 +12,12 @@
   display: none;
 }
 
-/* Modal de ConfiguraÃ§Ãµes sempre acima da TV e da sobreposiÃ§Ã£o */
+/* Modal de Configurações sempre acima da TV e da sobreposição */
 .settings-backdrop {
   z-index: 300;
 }
 
-/* Quando estÃ¡ no Modo Simples com um canal aberto: experiÃªncia 100% TV */
+/* Quando está no Modo Simples com um canal aberto: experiência 100% TV */
 body.ui-simple.tv-active .app-layout {
   z-index: auto;
 }
@@ -348,7 +348,7 @@ body.ui-simple.tv-active .tv-error-toast:not(.hidden) {
   gap: 8px;
 }
 
-/* Ocultar listas, sidebar, busca e dock mobile quando estiver assistindo TV sem sobreposiÃ§Ã£o */
+/* Ocultar listas, sidebar, busca e dock mobile quando estiver assistindo TV sem sobreposição */
 body.ui-simple.tv-active:not(.tv-overlay-open) .sidebar,
 body.ui-simple.tv-active:not(.tv-overlay-open) .mobile-bottom-nav {
   opacity: 0;
@@ -360,7 +360,7 @@ body.ui-simple.tv-active:not(.tv-overlay-open) #browseWorkspace {
 }
 
 /* =========================================================
-   SOBREPOSIÃ‡ÃƒO UNIFICADA DE CANAIS, BUSCA, CATEGORIAS E GUIA SOBRE A TV
+   SOBREPOSIÇÃO UNIFICADA DE CANAIS, BUSCA, CATEGORIAS E GUIA SOBRE A TV
    ========================================================= */
 body.ui-simple.tv-active.tv-overlay-open .tv-overlay-backdrop {
   display: block;
@@ -440,7 +440,7 @@ body.ui-simple.tv-active.tv-overlay-open .tv-overlay-header {
   font-size: 12.5px !important;
 }
 
-/* Sidebar + Ãrea de Busca/Grade/Guia unificadas flutuando sobre o canal ao vivo */
+/* Sidebar + Área de Busca/Grade/Guia unificadas flutuando sobre o canal ao vivo */
 body.ui-simple.tv-active.tv-overlay-open .sidebar {
   position: fixed;
   top: 84px;
@@ -474,7 +474,7 @@ body.ui-simple.tv-active.tv-overlay-open #browseWorkspace {
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
 }
 
-/* Responsividade da TV e SobreposiÃ§Ã£o Unificada no Mobile */
+/* Responsividade da TV e Sobreposição Unificada no Mobile */
 @media (max-width: 960px) {
   body.ui-simple.tv-active .tv-top-hud {
     padding: 12px 12px 24px;

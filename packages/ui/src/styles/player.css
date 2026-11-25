@@ -1,4 +1,4 @@
-﻿/* SeÃ§Ã£o do Player de VÃ­deo (Glass Cinema Dock) */
+/* Seção do Player de Vídeo (Glass Cinema Dock) */
 .player-section {
   border-radius: var(--radius-xl);
   padding: 18px;
@@ -108,7 +108,7 @@
   cursor: pointer;
 }
 
-/* PÃ­lula Interativa AO VIVO (Substitui o relÃ³gio de tempo) */
+/* Pílula Interativa AO VIVO (Substitui o relógio de tempo) */
 .ctrl-live-badge {
   display: inline-flex;
   align-items: center;

@@ -1,4 +1,7 @@
+import Hls from 'hls.js';
+import mpegts from 'mpegts.js';
 import { apiClient } from '../../services/apiClient.js';
+import { platformBridge } from '../../services/platformBridge.js';
 import { escapeHtml, tryConvertXtreamToHls } from '../../utils/format.js';
 
 export function createPlayerController({
@@ -176,8 +179,8 @@ export function createPlayerController({
       const proxiedHlsUrl = useProxy ? apiClient.buildProxyUrl(targetHlsUrl) : targetHlsUrl;
       els.nowPlayingBadge.textContent = convertedHlsUrl ? 'AO VIVO • HLS TEMPO REAL' : 'AO VIVO • HLS';
 
-      if (window.Hls && window.Hls.isSupported()) {
-        hlsPlayer = new window.Hls({
+      if (Hls && Hls.isSupported()) {
+        hlsPlayer = new Hls({
           enableWorker: true,
           lowLatencyMode: false,
           backBufferLength: 30,
@@ -194,13 +197,13 @@ export function createPlayerController({
         hlsPlayer.loadSource(proxiedHlsUrl);
         hlsPlayer.attachMedia(els.videoPlayer);
 
-        hlsPlayer.on(window.Hls.Events.MANIFEST_PARSED, () => {
+        hlsPlayer.on(Hls.Events.MANIFEST_PARSED, () => {
           els.videoPlayer.play().catch(() => {});
         });
 
-        hlsPlayer.on(window.Hls.Events.ERROR, (_, data) => {
+        hlsPlayer.on(Hls.Events.ERROR, (_, data) => {
           if (data.fatal) {
-            if (data.type === window.Hls.ErrorTypes.MEDIA_ERROR) {
+            if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
               hlsPlayer.recoverMediaError();
               return;
             }
@@ -222,8 +225,8 @@ export function createPlayerController({
       els.nowPlayingBadge.textContent = 'AO VIVO • TS CONTÍNUO';
       const tsUrl = useProxy ? apiClient.buildProxyUrl(item.url, { continuous: true }) : item.url;
 
-      if (window.mpegts && window.mpegts.getFeatureList().mseLivePlayback) {
-        mpegtsPlayer = window.mpegts.createPlayer(
+      if (mpegts && mpegts.getFeatureList().mseLivePlayback) {
+        mpegtsPlayer = mpegts.createPlayer(
           {
             type: 'mpegts',
             isLive: true,
@@ -244,7 +247,7 @@ export function createPlayerController({
         mpegtsPlayer.load();
         mpegtsPlayer.play().catch(() => {});
 
-        mpegtsPlayer.on(window.mpegts.Events.ERROR, (errorType, errorDetail) => {
+        mpegtsPlayer.on(mpegts.Events.ERROR, (errorType, errorDetail) => {
           if (state.currentStream && state.currentStream.url === item.url) {
             els.playerStatusText.textContent = 'Ressincronizando transmissão ao vivo...';
             els.playerOverlay.classList.remove('hidden');
@@ -318,7 +321,8 @@ export function createPlayerController({
     els.copyUrlBtn.addEventListener('click', async () => {
       if (!state.currentStream) return;
       try {
-        await navigator.clipboard.writeText(state.currentStream.url);
+        const copied = await platformBridge.copyText(state.currentStream.url);
+        if (!copied) throw new Error('no-clipboard');
         const original = els.copyUrlBtn.textContent;
         els.copyUrlBtn.textContent = '✅ Copiado!';
         setTimeout(() => (els.copyUrlBtn.textContent = original), 1500);

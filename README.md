@@ -27,15 +27,21 @@ Aplicação moderna de IPTV com design **Liquid Glass (Glassmorphism)**, **Modo 
 ## 🚀 Como Executar o Projeto
 
 ### Pré-requisitos
-- **Node.js** (v18 ou superior — utiliza módulos nativos do Node na Fase 1, sem necessidade de `npm install`).
+- **Node.js** (v18 ou superior)
 
-### Modo Desenvolvimento (auto-reload)
+### Instalar dependências (Vite, `hls.js`, `mpegts.js` e fonte local)
+```powershell
+npm install
+```
+
+### Modo Desenvolvimento (auto-reload do Vite + Servidor Node)
 ```powershell
 npm run dev
 ```
 
-### Modo Normal
+### Build de Produção + Iniciar
 ```powershell
+npm run build
 npm start
 ```
 

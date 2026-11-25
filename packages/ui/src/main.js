@@ -1,3 +1,10 @@
+import '@fontsource/plus-jakarta-sans/400.css';
+import '@fontsource/plus-jakarta-sans/500.css';
+import '@fontsource/plus-jakarta-sans/600.css';
+import '@fontsource/plus-jakarta-sans/700.css';
+import '@fontsource/plus-jakarta-sans/800.css';
+import './styles/main.css';
+
 import { state } from './state/store.js';
 import { queryDomElements } from './state/dom.js';
 import { createScannerController } from './features/scanner/scannerController.js';

@@ -1,6 +1,7 @@
 # Dependências, builds e artefatos de empacotamento
 node_modules/
 dist/
+packages/ui/dist/
 release/
 
 # Dados em tempo de execução (listas .m3u8 baixadas via GitHub Sync e caches locais)

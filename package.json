@@ -1,11 +1,23 @@
 {
   "name": "mahattv",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "MahatTV • Glass Stream Player (Arquitetura Modular pronta para Web, Desktop e Mobile)",
   "private": true,
   "main": "packages/server/index.js",
   "scripts": {
     "start": "node packages/server/index.js",
-    "dev": "node --watch packages/server/index.js"
+    "build": "npm run build:ui",
+    "build:ui": "vite build --config packages/ui/vite.config.js",
+    "dev": "node scripts/dev.js",
+    "dev:server": "node --watch packages/server/index.js",
+    "dev:ui": "vite --config packages/ui/vite.config.js"
+  },
+  "dependencies": {
+    "@fontsource/plus-jakarta-sans": "^5.2.5",
+    "hls.js": "^1.5.15",
+    "mpegts.js": "^1.7.3"
+  },
+  "devDependencies": {
+    "vite": "^6.2.0"
   }
 }

@@ -1,20 +1,12 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#060913" />
-  <title>MahatTV â€¢ Glass Stream Player</title>
+  <title>MahatTV • Glass Stream Player</title>
   <link rel="icon" type="image/png" href="logo.png" />
   <link rel="apple-touch-icon" href="logo.png" />
-  <!-- Fonte Moderna Plus Jakarta Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="src/styles/main.css" />
-  <!-- Bibliotecas de reproduÃ§Ã£o para HLS (.m3u8) e MPEG-TS (.ts) -->
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.15/dist/hls.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.js"></script>
 </head>
 <body>
   <!-- Luzes de fundo para efeito Glassmorphism (Liquid Glass) -->
@@ -27,19 +19,19 @@
   <!-- Overlay escuro para o menu gaveta no Mobile -->
   <div id="sidebarBackdrop" class="sidebar-backdrop hidden"></div>
 
-  <!-- Fundo e CabeÃ§alho da SobreposiÃ§Ã£o Unificada no Modo TV Simples -->
+  <!-- Fundo e Cabeçalho da Sobreposição Unificada no Modo TV Simples -->
   <div id="tvOverlayBackdrop" class="tv-overlay-backdrop" aria-hidden="true"></div>
   <div id="tvOverlayHeader" class="tv-overlay-header glass-panel">
     <div class="tv-overlay-header-left">
       <img src="logo.png" alt="MahatTV" class="tv-overlay-brand-img" />
       <div class="tv-overlay-title-wrap">
         <span class="tv-overlay-title">Canais, Busca &amp; Guia</span>
-        <span id="tvOverlayNowPlaying" class="tv-overlay-now">â— Assistindo ao vivo</span>
+        <span id="tvOverlayNowPlaying" class="tv-overlay-now">● Assistindo ao vivo</span>
       </div>
     </div>
     <div class="tv-overlay-header-right">
       <button id="tvOverlayCloseBtn" class="btn-glass-primary tv-return-btn" title="Voltar para o canal em tela cheia (ESC)">
-        ðŸ“º Voltar para a TV
+        📺 Voltar para a TV
       </button>
     </div>
   </div>
@@ -63,7 +55,7 @@
         </button>
       </div>
 
-      <!-- Acesso Direto Ã s Listas Salvas -->
+      <!-- Acesso Direto às Listas Salvas -->
       <div class="sidebar-section">
         <span class="section-label">Canais Ao Vivo Unificados</span>
         <div class="unified-buttons">
@@ -81,14 +73,14 @@
 
           <button id="btnViewLiveBR" class="unified-btn all-btn">
             <span class="btn-left">
-              <span class="round-icon icon-blue">ðŸ‡§ðŸ‡·</span>
+              <span class="round-icon icon-blue">🇧🇷</span>
               <span>Canais Ao Vivo (BR)</span>
             </span>
           </button>
 
           <button id="btnViewAllLists" class="unified-btn all-btn">
             <span class="btn-left">
-              <span class="round-icon icon-violet">ðŸŒ</span>
+              <span class="round-icon icon-violet">🌐</span>
               <span>Todos Ao Vivo (Global)</span>
             </span>
           </button>
@@ -108,19 +100,19 @@
         </div>
 
         <button id="openScannerBtn" class="btn-scanner-trigger complete-only">
-          <span class="round-icon-sm">âš¡</span>
+          <span class="round-icon-sm">⚡</span>
           <span>Verificar Canais Ao Vivo</span>
         </button>
 
-        <!-- Card de SincronizaÃ§Ã£o com GitHub (Ramys/Iptv-Brasil-2026) -->
+        <!-- Card de Sincronização com GitHub (Ramys/Iptv-Brasil-2026) -->
         <div id="githubMiniCard" class="github-mini-card complete-only">
           <div class="gh-mini-top">
             <span id="ghStatusDot" class="gh-dot checking"></span>
             <span id="ghMiniStatusText" class="gh-mini-text">Verificando GitHub...</span>
           </div>
           <div class="gh-mini-actions">
-            <button id="openGithubPanelBtn" class="gh-mini-btn">ðŸ”„ RepositÃ³rio & Listas</button>
-            <button id="quickUpdateGithubBtn" class="gh-mini-btn gh-btn-highlight hidden">â¬‡ï¸ Atualizar</button>
+            <button id="openGithubPanelBtn" class="gh-mini-btn">🔄 Repositório & Listas</button>
+            <button id="quickUpdateGithubBtn" class="gh-mini-btn gh-btn-highlight hidden">⬇️ Atualizar</button>
           </div>
         </div>
       </div>
@@ -136,7 +128,7 @@
       <div class="sidebar-section categories-section">
         <div class="section-header">
           <span class="section-label">Categorias (<span id="categoryCount">0</span>)</span>
-          <button id="catSortToggleBtn" class="cat-sort-btn" title="Alternar ordem das categorias (Quantidade / A-Z)">ðŸ”¢ Qtd</button>
+          <button id="catSortToggleBtn" class="cat-sort-btn" title="Alternar ordem das categorias (Quantidade / A-Z)">🔢 Qtd</button>
         </div>
         <div class="category-search-box">
           <svg class="input-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -154,15 +146,15 @@
       </div>
     </aside>
 
-    <!-- Ãrea Principal -->
+    <!-- Área Principal -->
     <main class="main-content">
-      <!-- SeÃ§Ã£o do Player de VÃ­deo (Glass Cinema Dock no Modo Completo / Tela Cheia TV Imersiva no Modo Simples) -->
+      <!-- Seção do Player de Vídeo (Glass Cinema Dock no Modo Completo / Tela Cheia TV Imersiva no Modo Simples) -->
       <section id="playerSection" class="player-section glass-panel hidden">
         <div class="player-container">
           <div id="videoWrapper" class="video-wrapper">
             <video id="videoPlayer" autoplay playsinline></video>
 
-            <!-- HUD Superior estilo Smart TV (Exibido no Modo Simples sobre o vÃ­deo e auto-oculto ao ficar inativo) -->
+            <!-- HUD Superior estilo Smart TV (Exibido no Modo Simples sobre o vídeo e auto-oculto ao ficar inativo) -->
             <div id="tvTopHud" class="tv-top-hud">
               <div class="tv-hud-left">
                 <div id="tvHudLogoBox" class="tv-hud-logo">
@@ -188,22 +180,22 @@
               </div>
 
               <div class="tv-hud-actions">
-                <div class="tv-zap-group" title="Trocar de canal (Setas â†‘ / â†“)">
-                  <button id="tvPrevChannelBtn" class="tv-hud-btn tv-hud-icon" title="Canal anterior (Seta â†‘)">â®</button>
-                  <button id="tvNextChannelBtn" class="tv-hud-btn tv-hud-icon" title="PrÃ³ximo canal (Seta â†“)">â­</button>
+                <div class="tv-zap-group" title="Trocar de canal (Setas ↑ / ↓)">
+                  <button id="tvPrevChannelBtn" class="tv-hud-btn tv-hud-icon" title="Canal anterior (Seta ↑)">⏮</button>
+                  <button id="tvNextChannelBtn" class="tv-hud-btn tv-hud-icon" title="Próximo canal (Seta ↓)">⏭</button>
                 </div>
-                <button id="tvOpenChannelsBtn" class="tv-hud-btn tv-hud-primary" title="Abrir canais, categorias e busca sobre o vÃ­deo (C)">
-                  <span>ðŸ“º</span>
+                <button id="tvOpenChannelsBtn" class="tv-hud-btn tv-hud-primary" title="Abrir canais, categorias e busca sobre o vídeo (C)">
+                  <span>📺</span>
                   <span class="tv-hud-btn-label">Canais &amp; Busca</span>
                 </button>
-                <button id="tvOpenGuideBtn" class="tv-hud-btn" title="Abrir Guia de ProgramaÃ§Ã£o sobre o vÃ­deo (G)">
-                  <span>ðŸ“…</span>
+                <button id="tvOpenGuideBtn" class="tv-hud-btn" title="Abrir Guia de Programação sobre o vídeo (G)">
+                  <span>📅</span>
                   <span class="tv-hud-btn-label">Guia</span>
                 </button>
-                <button id="tvHudFavBtn" class="tv-hud-btn tv-hud-icon" title="Favoritar canal">â˜…</button>
-                <button id="tvHudSettingsBtn" class="tv-hud-btn tv-hud-icon" title="ConfiguraÃ§Ãµes">âš™ï¸</button>
+                <button id="tvHudFavBtn" class="tv-hud-btn tv-hud-icon" title="Favoritar canal">★</button>
+                <button id="tvHudSettingsBtn" class="tv-hud-btn tv-hud-icon" title="Configurações">⚙️</button>
                 <button id="tvExitBtn" class="tv-hud-btn tv-hud-danger" title="Sair da TV (Fechar canal)">
-                  <span>âœ•</span>
+                  <span>✕</span>
                   <span class="tv-hud-btn-label">Sair</span>
                 </button>
               </div>
@@ -211,16 +203,16 @@
 
             <!-- Aviso Flutuante de Erro no Modo TV -->
             <div id="tvErrorToast" class="tv-error-toast hidden">
-              <div class="tv-error-icon">âš ï¸</div>
-              <div id="tvErrorText" class="tv-error-text">NÃ£o foi possÃ­vel reproduzir este canal.</div>
+              <div class="tv-error-icon">⚠️</div>
+              <div id="tvErrorText" class="tv-error-text">Não foi possível reproduzir este canal.</div>
               <div class="tv-error-actions">
-                <button id="tvErrorRetryBtn" class="btn-glass-primary">ðŸ”„ Tentar Novamente</button>
-                <button id="tvErrorNextBtn" class="btn-glass-secondary">â­ PrÃ³ximo Canal</button>
-                <button id="tvErrorChannelsBtn" class="btn-glass-secondary">ðŸ“º Escolher Canal</button>
+                <button id="tvErrorRetryBtn" class="btn-glass-primary">🔄 Tentar Novamente</button>
+                <button id="tvErrorNextBtn" class="btn-glass-secondary">⏭ Próximo Canal</button>
+                <button id="tvErrorChannelsBtn" class="btn-glass-secondary">📺 Escolher Canal</button>
               </div>
             </div>
 
-            <!-- Overlay de Carregamento / ConexÃ£o -->
+            <!-- Overlay de Carregamento / Conexão -->
             <div id="playerOverlay" class="player-overlay hidden">
               <div class="spinner"></div>
               <p id="playerStatusText">Conectando ao stream ao vivo...</p>
@@ -255,8 +247,8 @@
                   <input id="ctrlVolumeSlider" type="range" min="0" max="1" step="0.05" value="1" class="volume-slider" title="Volume" />
                 </div>
 
-                <!-- BotÃ£o / Indicador AO VIVO (Substitui o tempo tradicional) -->
-                <button id="ctrlLiveEdgeBtn" class="ctrl-live-badge is-live-edge" title="Clique para pular imediatamente para o segundo mais recente da transmissÃ£o ao vivo">
+                <!-- Botão / Indicador AO VIVO (Substitui o tempo tradicional) -->
+                <button id="ctrlLiveEdgeBtn" class="ctrl-live-badge is-live-edge" title="Clique para pular imediatamente para o segundo mais recente da transmissão ao vivo">
                   <span class="ctrl-live-dot"></span>
                   <span id="ctrlLiveText">AO VIVO</span>
                 </button>
@@ -287,16 +279,16 @@
                 <span class="live-dot"></span>
                 <span id="nowPlayingBadge">AO VIVO</span>
               </span>
-              <button id="closePlayerBtn" class="icon-circle-btn" title="Fechar Player">âœ•</button>
+              <button id="closePlayerBtn" class="icon-circle-btn" title="Fechar Player">✕</button>
             </div>
 
             <h2 id="nowPlayingTitle">Selecione um canal</h2>
             <p id="nowPlayingGroup" class="now-playing-group">-</p>
 
-            <!-- Mini Guia Ao Vivo do Canal em ReproduÃ§Ã£o -->
+            <!-- Mini Guia Ao Vivo do Canal em Reprodução -->
             <div id="playerEpgBox" class="player-epg-box hidden">
               <div class="player-epg-head">
-                <span class="player-epg-tag">ðŸ“… AGORA NO AR</span>
+                <span class="player-epg-tag">📅 AGORA NO AR</span>
                 <span id="playerEpgTime" class="player-epg-time">--:-- - --:--</span>
               </div>
               <div id="playerEpgTitle" class="player-epg-title"></div>
@@ -310,19 +302,19 @@
             <div class="player-controls-extra complete-only">
               <label class="toggle-label">
                 <input type="checkbox" id="smartHlsToggle" checked />
-                <span>ðŸ›¡ï¸ Anti-Travamento (HLS + ReconexÃ£o ContÃ­nua)</span>
+                <span>🛡️ Anti-Travamento (HLS + Reconexão Contínua)</span>
               </label>
 
               <label class="toggle-label">
                 <input type="checkbox" id="useProxyToggle" checked />
-                <span>ðŸŒ Usar Proxy Local (Evita bloqueio CORS)</span>
+                <span>🌐 Usar Proxy Local (Evita bloqueio CORS)</span>
               </label>
 
               <div class="action-buttons">
-                <button id="retryStreamBtn" class="btn-glass-secondary">ðŸ”„ Reconectar</button>
-                <button id="forceTsBtn" class="btn-glass-secondary">âš¡ Modo TS</button>
-                <button id="copyUrlBtn" class="btn-glass-secondary">ðŸ“‹ Copiar Link</button>
-                <a id="openExternalBtn" href="#" target="_blank" rel="noopener" class="btn-glass-secondary">ðŸ”— Abrir Direto</a>
+                <button id="retryStreamBtn" class="btn-glass-secondary">🔄 Reconectar</button>
+                <button id="forceTsBtn" class="btn-glass-secondary">⚡ Modo TS</button>
+                <button id="copyUrlBtn" class="btn-glass-secondary">📋 Copiar Link</button>
+                <a id="openExternalBtn" href="#" target="_blank" rel="noopener" class="btn-glass-secondary">🔗 Abrir Direto</a>
               </div>
             </div>
 
@@ -335,7 +327,7 @@
         </div>
       </section>
 
-      <!-- Ãrea Unificada de NavegaÃ§Ã£o (No Modo TV Simples, flutua como sobreposiÃ§Ã£o translÃºcida sobre o canal) -->
+      <!-- Área Unificada de Navegação (No Modo TV Simples, flutua como sobreposição translúcida sobre o canal) -->
       <div id="browseWorkspace" class="browse-workspace">
       <!-- Barra Superior de Vidro (Sticky no Mobile e Desktop) -->
       <header class="topbar glass-panel">
@@ -356,73 +348,73 @@
             <input
               type="text"
               id="searchInput"
-              placeholder="Buscar canal, categoria ou programaÃ§Ã£o..."
+              placeholder="Buscar canal, categoria ou programação..."
             />
-            <button id="clearSearchBtn" class="clear-btn hidden" title="Limpar busca">âœ•</button>
+            <button id="clearSearchBtn" class="clear-btn hidden" title="Limpar busca">✕</button>
           </div>
 
-          <button id="topEpgBtn" class="icon-circle-btn" title="Guia de ProgramaÃ§Ã£o (EPG) da Categoria">
-            ðŸ“…
+          <button id="topEpgBtn" class="icon-circle-btn" title="Guia de Programação (EPG) da Categoria">
+            📅
           </button>
 
           <button id="topGithubBtn" class="icon-circle-btn complete-only" title="Sincronizar Listas com GitHub (Ramys/Iptv-Brasil-2026)">
-            ðŸ”„
+            🔄
           </button>
 
           <button id="topScannerBtn" class="icon-circle-btn accent-glow complete-only" title="Abrir Verificador de Canais">
-            âš¡
+            ⚡
           </button>
 
-          <button id="openSettingsBtn" class="icon-circle-btn settings-trigger-btn" title="ConfiguraÃ§Ãµes (Modo Simples / Completo, Player, EPG e Ferramentas)">
-            âš™ï¸
-            <span id="settingsUpdateDot" class="settings-notify-dot hidden" title="AtualizaÃ§Ã£o de listas disponÃ­vel"></span>
+          <button id="openSettingsBtn" class="icon-circle-btn settings-trigger-btn" title="Configurações (Modo Simples / Completo, Player, EPG e Ferramentas)">
+            ⚙️
+            <span id="settingsUpdateDot" class="settings-notify-dot hidden" title="Atualização de listas disponível"></span>
           </button>
         </div>
 
         <div class="filter-chips">
-          <button class="chip active" data-type="ALL">âœ¨ Todos</button>
-          <button class="chip" data-type="LIVE">ðŸ“º TV Ao Vivo</button>
-          <button class="chip" data-type="ONLINE">âœ… Online</button>
-          <button class="chip complete-only" data-type="OFFLINE">âŒ Offline</button>
-          <button class="chip" data-type="mp4">ðŸŽ¬ Filmes/SÃ©ries</button>
-          <button class="chip" id="favFilterBtn" data-type="FAV">â­ Favoritos (<span id="favCount">0</span>)</button>
+          <button class="chip active" data-type="ALL">✨ Todos</button>
+          <button class="chip" data-type="LIVE">📺 TV Ao Vivo</button>
+          <button class="chip" data-type="ONLINE">✅ Online</button>
+          <button class="chip complete-only" data-type="OFFLINE">❌ Offline</button>
+          <button class="chip" data-type="mp4">🎬 Filmes/Séries</button>
+          <button class="chip" id="favFilterBtn" data-type="FAV">⭐ Favoritos (<span id="favCount">0</span>)</button>
         </div>
       </header>
 
-      <!-- Painel de SincronizaÃ§Ã£o com RepositÃ³rio GitHub (Ramys/Iptv-Brasil-2026) -->
+      <!-- Painel de Sincronização com Repositório GitHub (Ramys/Iptv-Brasil-2026) -->
       <section id="githubPanel" class="scanner-panel glass-panel hidden">
         <div class="scanner-header">
           <div class="scanner-title-group">
-            <span class="round-icon icon-blue">ðŸ”„</span>
+            <span class="round-icon icon-blue">🔄</span>
             <div>
-              <h3>SincronizaÃ§Ã£o de Listas â€¢ GitHub</h3>
+              <h3>Sincronização de Listas • GitHub</h3>
               <p class="scanner-desc">
-                Monitora o repositÃ³rio oficial <a href="https://github.com/Ramys/Iptv-Brasil-2026" target="_blank" rel="noopener" class="gh-link">github.com/Ramys/Iptv-Brasil-2026</a> comparando a assinatura SHA-1 de cada arquivo <code>.m3u8</code>.
+                Monitora o repositório oficial <a href="https://github.com/Ramys/Iptv-Brasil-2026" target="_blank" rel="noopener" class="gh-link">github.com/Ramys/Iptv-Brasil-2026</a> comparando a assinatura SHA-1 de cada arquivo <code>.m3u8</code>.
               </p>
             </div>
           </div>
-          <button id="closeGithubPanelBtn" class="icon-circle-btn" title="Fechar painel">âœ•</button>
+          <button id="closeGithubPanelBtn" class="icon-circle-btn" title="Fechar painel">✕</button>
         </div>
 
         <div class="gh-commit-banner">
-          <div id="ghCommitInfo" class="gh-commit-info">Consultando Ãºltimo commit no GitHub...</div>
+          <div id="ghCommitInfo" class="gh-commit-info">Consultando último commit no GitHub...</div>
           <label class="toggle-label">
             <input type="checkbox" id="ghAutoUpdateToggle" checked />
-            <span>Baixar automaticamente quando houver atualizaÃ§Ã£o no GitHub</span>
+            <span>Baixar automaticamente quando houver atualização no GitHub</span>
           </label>
         </div>
 
         <div class="scanner-actions">
-          <button id="checkGithubNowBtn" class="btn-glass-secondary">ðŸ” Verificar AtualizaÃ§Ãµes Agora</button>
-          <button id="pullGithubUpdatesBtn" class="btn-glass-primary hidden">â¬‡ï¸ Baixar Listas Desatualizadas</button>
-          <button id="forcePullAllGithubBtn" class="btn-glass-secondary">ðŸ“¥ Rebaixar Todas do GitHub</button>
+          <button id="checkGithubNowBtn" class="btn-glass-secondary">🔍 Verificar Atualizações Agora</button>
+          <button id="pullGithubUpdatesBtn" class="btn-glass-primary hidden">⬇️ Baixar Listas Desatualizadas</button>
+          <button id="forcePullAllGithubBtn" class="btn-glass-secondary">📥 Rebaixar Todas do GitHub</button>
         </div>
 
         <div id="ghUpdateProgressBox" class="scanner-progress-area hidden">
           <div class="progress-bar-bg">
             <div id="ghUpdateProgressBar" class="progress-bar-fill" style="width: 0%"></div>
           </div>
-          <div id="ghUpdateProgressText" class="scanner-current-item">Baixando atualizaÃ§Ã£o...</div>
+          <div id="ghUpdateProgressText" class="scanner-current-item">Baixando atualização...</div>
         </div>
 
         <div id="ghFilesList" class="gh-files-grid"></div>
@@ -432,7 +424,7 @@
       <section id="scannerPanel" class="scanner-panel glass-panel hidden">
         <div class="scanner-header">
           <div class="scanner-title-group">
-            <span class="round-icon icon-violet">âš¡</span>
+            <span class="round-icon icon-violet">⚡</span>
             <div>
               <h3>Verificador de Canais Ao Vivo</h3>
               <p class="scanner-desc">
@@ -440,29 +432,29 @@
               </p>
             </div>
           </div>
-          <button id="closeScannerBtn" class="icon-circle-btn" title="Fechar painel">âœ•</button>
+          <button id="closeScannerBtn" class="icon-circle-btn" title="Fechar painel">✕</button>
         </div>
 
         <div class="scanner-controls">
           <div class="scanner-field">
             <label for="scannerScopeSelect">Escopo de Canais Ao Vivo</label>
             <select id="scannerScopeSelect" class="select-input">
-              <option value="__LIVE_BR__" selected>ðŸ‡§ðŸ‡· Canais Ao Vivo do Brasil (~4.500 canais)</option>
-              <option value="__ALL_LIVE__">ðŸŒ Todos os Canais Ao Vivo (BR + Internacional â€” ~18.300 canais)</option>
-              <option value="CanaisBR03.m3u8">âš¡ Lista RÃ¡pida: CanaisBR03.m3u8 (112 canais)</option>
-              <option value="Canais.m3u8">ðŸ“º Lista Principal: Canais.m3u8 (520 canais)</option>
-              <option value="CanaisBR02.m3u8">ðŸ“¡ Canais Ao Vivo de CanaisBR02.m3u8 (1.113 canais)</option>
-              <option value="CanaisBR04.m3u8">ðŸ“¡ Canais Ao Vivo de CanaisBR04.m3u8 (2.775 canais)</option>
-              <option value="CURRENT_FILTER">ðŸŽ¯ Apenas Categoria / Busca Atual na Tela</option>
+              <option value="__LIVE_BR__" selected>🇧🇷 Canais Ao Vivo do Brasil (~4.500 canais)</option>
+              <option value="__ALL_LIVE__">🌐 Todos os Canais Ao Vivo (BR + Internacional — ~18.300 canais)</option>
+              <option value="CanaisBR03.m3u8">⚡ Lista Rápida: CanaisBR03.m3u8 (112 canais)</option>
+              <option value="Canais.m3u8">📺 Lista Principal: Canais.m3u8 (520 canais)</option>
+              <option value="CanaisBR02.m3u8">📡 Canais Ao Vivo de CanaisBR02.m3u8 (1.113 canais)</option>
+              <option value="CanaisBR04.m3u8">📡 Canais Ao Vivo de CanaisBR04.m3u8 (2.775 canais)</option>
+              <option value="CURRENT_FILTER">🎯 Apenas Categoria / Busca Atual na Tela</option>
             </select>
           </div>
 
           <div class="scanner-field">
-            <label for="scannerMaxSelect">Limite por verificaÃ§Ã£o</label>
+            <label for="scannerMaxSelect">Limite por verificação</label>
             <select id="scannerMaxSelect" class="select-input">
-              <option value="500">AtÃ© 500 canais</option>
-              <option value="2000">AtÃ© 2.000 canais</option>
-              <option value="5000" selected>AtÃ© 5.000 canais</option>
+              <option value="500">Até 500 canais</option>
+              <option value="2000">Até 2.000 canais</option>
+              <option value="5000" selected>Até 5.000 canais</option>
               <option value="0">Sem limite (Todos)</option>
             </select>
           </div>
@@ -474,15 +466,15 @@
             </label>
             <label class="toggle-label">
               <input type="checkbox" id="scannerOnlyUnchecked" checked />
-              <span>Testar apenas canais nÃ£o verificados</span>
+              <span>Testar apenas canais não verificados</span>
             </label>
           </div>
 
           <div class="scanner-actions">
-            <button id="startScannerBtn" class="btn-glass-primary">â–¶ï¸ Iniciar VerificaÃ§Ã£o</button>
-            <button id="stopScannerBtn" class="btn-glass-danger hidden">â¹ï¸ Parar</button>
-            <button id="goToOnlineBtn" class="btn-glass-success">âœ… Ver Canais Online</button>
-            <button id="clearVerifiedBtn" class="btn-glass-secondary">ðŸ—‘ï¸ Zerar</button>
+            <button id="startScannerBtn" class="btn-glass-primary">▶️ Iniciar Verificação</button>
+            <button id="stopScannerBtn" class="btn-glass-danger hidden">⏹️ Parar</button>
+            <button id="goToOnlineBtn" class="btn-glass-success">✅ Ver Canais Online</button>
+            <button id="clearVerifiedBtn" class="btn-glass-secondary">🗑️ Zerar</button>
           </div>
         </div>
 
@@ -492,64 +484,64 @@
           </div>
           <div class="scanner-metrics">
             <span id="scannerMetricProgress">0 / 0 (0%)</span>
-            <span id="scannerMetricOnline" class="metric-online">âœ… Online: 0</span>
-            <span id="scannerMetricOffline" class="metric-offline">âŒ Offline: 0</span>
-            <span id="scannerMetricSpeed">âš¡ 0 canais/s</span>
+            <span id="scannerMetricOnline" class="metric-online">✅ Online: 0</span>
+            <span id="scannerMetricOffline" class="metric-offline">❌ Offline: 0</span>
+            <span id="scannerMetricSpeed">⚡ 0 canais/s</span>
           </div>
           <div id="scannerCurrentItem" class="scanner-current-item">Pronto para verificar canais ao vivo.</div>
         </div>
       </section>
 
-      <!-- CabeÃ§alho de Resultados, Alternador Grade/Guia e PaginaÃ§Ã£o -->
+      <!-- Cabeçalho de Resultados, Alternador Grade/Guia e Paginação -->
       <div class="results-bar">
         <div class="results-left">
-          <div id="activeCategoryPill" class="active-category-pill">ðŸ“‚ Todas as Categorias</div>
+          <div id="activeCategoryPill" class="active-category-pill">📂 Todas as Categorias</div>
           <span id="resultsSummary" class="results-summary">Carregando canais...</span>
         </div>
         <div class="results-right">
           <div class="sort-control-box">
             <label for="channelSortSelect" class="sort-label-sr">Ordenar canais</label>
-            <select id="channelSortSelect" class="sort-select" title="Organizar canais e Guia de ProgramaÃ§Ã£o">
-              <option value="default">ðŸ“‹ Ordem da Lista</option>
-              <option value="az">ðŸ”¤ Nome (A â†’ Z)</option>
-              <option value="za">ðŸ”¤ Nome (Z â†’ A)</option>
-              <option value="online_first">ðŸŸ¢ Online Primeiro</option>
-              <option value="favorites_first">â­ Favoritos Primeiro</option>
-              <option value="epg_first">ðŸ“… Com Guia EPG Primeiro</option>
-              <option value="quality">ðŸŽ¬ Maior Qualidade (4K/FHD/HD)</option>
-              <option value="category_az">ðŸ“‚ Categoria (A â†’ Z)</option>
+            <select id="channelSortSelect" class="sort-select" title="Organizar canais e Guia de Programação">
+              <option value="default">📋 Ordem da Lista</option>
+              <option value="az">🔤 Nome (A → Z)</option>
+              <option value="za">🔤 Nome (Z → A)</option>
+              <option value="online_first">🟢 Online Primeiro</option>
+              <option value="favorites_first">⭐ Favoritos Primeiro</option>
+              <option value="epg_first">📅 Com Guia EPG Primeiro</option>
+              <option value="quality">🎬 Maior Qualidade (4K/FHD/HD)</option>
+              <option value="category_az">📂 Categoria (A → Z)</option>
             </select>
           </div>
-          <div class="view-mode-switch" role="tablist" aria-label="Modo de visualizaÃ§Ã£o">
+          <div class="view-mode-switch" role="tablist" aria-label="Modo de visualização">
             <button id="viewModeGridBtn" class="view-mode-btn active" role="tab" aria-selected="true">
-              <span>ðŸ“º</span>
+              <span>📺</span>
               <span>Grade</span>
             </button>
             <button id="viewModeEpgBtn" class="view-mode-btn" role="tab" aria-selected="false">
-              <span>ðŸ“…</span>
-              <span>Guia de ProgramaÃ§Ã£o</span>
+              <span>📅</span>
+              <span>Guia de Programação</span>
             </button>
           </div>
           <div id="paginationControls" class="pagination">
-            <button id="prevPageBtn" class="btn-page" disabled>â—€</button>
+            <button id="prevPageBtn" class="btn-page" disabled>◀</button>
             <span id="pageIndicator" class="page-indicator">1 / 1</span>
-            <button id="nextPageBtn" class="btn-page" disabled>â–¶</button>
+            <button id="nextPageBtn" class="btn-page" disabled>▶</button>
           </div>
         </div>
       </div>
 
-      <!-- SeÃ§Ã£o do Guia de ProgramaÃ§Ã£o (EPG Timeline) dos Canais da Categoria Selecionada -->
+      <!-- Seção do Guia de Programação (EPG Timeline) dos Canais da Categoria Selecionada -->
       <section id="epgGuideSection" class="epg-guide-section glass-panel hidden">
         <div class="epg-toolbar">
           <div class="epg-toolbar-info">
-            <h3 id="epgGuideTitle">ðŸ“… Guia de ProgramaÃ§Ã£o</h3>
+            <h3 id="epgGuideTitle">📅 Guia de Programação</h3>
             <p id="epgGuideSubtitle" class="epg-subtitle">Carregando grade da categoria selecionada...</p>
           </div>
           <div class="epg-toolbar-controls">
             <div class="epg-time-nav">
-              <button id="epgPrevBtn" class="btn-glass-secondary epg-nav-btn" title="Voltar 2 horas">â—€ -2h</button>
-              <button id="epgNowBtn" class="btn-glass-primary epg-nav-btn" title="Voltar para o horÃ¡rio atual">â— Agora</button>
-              <button id="epgNextBtn" class="btn-glass-secondary epg-nav-btn" title="AvanÃ§ar 2 horas">+2h â–¶</button>
+              <button id="epgPrevBtn" class="btn-glass-secondary epg-nav-btn" title="Voltar 2 horas">◀ -2h</button>
+              <button id="epgNowBtn" class="btn-glass-primary epg-nav-btn" title="Voltar para o horário atual">● Agora</button>
+              <button id="epgNextBtn" class="btn-glass-secondary epg-nav-btn" title="Avançar 2 horas">+2h ▶</button>
             </div>
             <div class="epg-filter-toggles">
               <label class="toggle-label epg-toggle">
@@ -558,14 +550,14 @@
               </label>
               <label class="toggle-label epg-toggle">
                 <input type="checkbox" id="epgOnlyWithGuideToggle" />
-                <span>SÃ³ com guia</span>
+                <span>Só com guia</span>
               </label>
-              <button id="epgRefreshBtn" class="btn-glass-secondary epg-nav-btn" title="Atualizar dados do EPG">ðŸ”„ Atualizar EPG</button>
+              <button id="epgRefreshBtn" class="btn-glass-secondary epg-nav-btn" title="Atualizar dados do EPG">🔄 Atualizar EPG</button>
             </div>
           </div>
         </div>
 
-        <!-- CartÃ£o de Detalhes do Programa Selecionado -->
+        <!-- Cartão de Detalhes do Programa Selecionado -->
         <div id="epgDetailCard" class="epg-detail-card hidden">
           <img id="epgDetailThumb" class="epg-detail-thumb hidden" alt="Capa do programa" />
           <div class="epg-detail-body">
@@ -578,78 +570,78 @@
             <p id="epgDetailDesc" class="epg-detail-desc"></p>
           </div>
           <div class="epg-detail-actions">
-            <button id="epgDetailPlayBtn" class="btn-glass-primary">â–¶ Assistir Canal</button>
-            <button id="epgDetailCloseBtn" class="icon-circle-btn" title="Fechar detalhes">âœ•</button>
+            <button id="epgDetailPlayBtn" class="btn-glass-primary">▶ Assistir Canal</button>
+            <button id="epgDetailCloseBtn" class="icon-circle-btn" title="Fechar detalhes">✕</button>
           </div>
         </div>
 
-        <!-- Grade Horizontal de ProgramaÃ§Ã£o (Timeline) -->
+        <!-- Grade Horizontal de Programação (Timeline) -->
         <div id="epgTimelineContainer" class="epg-timeline-container"></div>
       </section>
 
       <!-- Grade de Canais / Filmes -->
       <section id="itemsGrid" class="items-grid"></section>
 
-      <!-- RodapÃ© de PaginaÃ§Ã£o -->
+      <!-- Rodapé de Paginação -->
       <div id="bottomPagination" class="bottom-pagination hidden">
-        <button id="prevPageBottomBtn" class="btn-page">â—€ Anterior</button>
-        <span id="pageIndicatorBottom" class="page-indicator">PÃ¡gina 1 de 1</span>
-        <button id="nextPageBottomBtn" class="btn-page">PrÃ³xima â–¶</button>
+        <button id="prevPageBottomBtn" class="btn-page">◀ Anterior</button>
+        <span id="pageIndicatorBottom" class="page-indicator">Página 1 de 1</span>
+        <button id="nextPageBottomBtn" class="btn-page">Próxima ▶</button>
       </div>
       </div> <!-- /#browseWorkspace -->
     </main>
   </div>
 
-  <!-- Modal de ConfiguraÃ§Ãµes (Modo Simples / Completo, Player, EPG e Ferramentas) -->
+  <!-- Modal de Configurações (Modo Simples / Completo, Player, EPG e Ferramentas) -->
   <div id="settingsModalBackdrop" class="settings-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
     <div id="settingsModal" class="settings-modal glass-panel">
       <div class="settings-modal-header">
         <div class="settings-title-group">
-          <span class="round-icon icon-blue">âš™ï¸</span>
+          <span class="round-icon icon-blue">⚙️</span>
           <div>
-            <h2 id="settingsModalTitle">ConfiguraÃ§Ãµes</h2>
-            <p class="settings-subtitle">Organize a interface e acesse ferramentas avanÃ§adas sem poluir a tela</p>
+            <h2 id="settingsModalTitle">Configurações</h2>
+            <p class="settings-subtitle">Organize a interface e acesse ferramentas avançadas sem poluir a tela</p>
           </div>
         </div>
-        <button id="closeSettingsBtn" class="icon-circle-btn" title="Fechar configuraÃ§Ãµes">âœ•</button>
+        <button id="closeSettingsBtn" class="icon-circle-btn" title="Fechar configurações">✕</button>
       </div>
 
       <div class="settings-modal-body">
-        <!-- SeÃ§Ã£o 1: Modo de Interface (Simples vs Completo) -->
+        <!-- Seção 1: Modo de Interface (Simples vs Completo) -->
         <div class="settings-group">
-          <div class="settings-group-title">ðŸŽ›ï¸ Modo de VisualizaÃ§Ã£o da Interface</div>
+          <div class="settings-group-title">🎛️ Modo de Visualização da Interface</div>
           <div class="mode-cards-grid">
             <button id="modeSimpleCard" type="button" class="mode-card" data-mode="simple">
               <div class="mode-card-top">
-                <span class="mode-card-badge">âœ¨ Limpo</span>
-                <span class="mode-card-check">âœ“</span>
+                <span class="mode-card-badge">✨ Limpo</span>
+                <span class="mode-card-check">✓</span>
               </div>
               <div class="mode-card-title">Modo Simples (Estilo TV)</div>
               <p class="mode-card-desc">
-                ExperiÃªncia imersiva de TV: ao abrir um canal, o vÃ­deo ocupa a tela toda e a lista de canais, busca, categorias e guia aparecem unificados em sobreposiÃ§Ã£o quando vocÃª quiser.
+                Experiência imersiva de TV: ao abrir um canal, o vídeo ocupa a tela toda e a lista de canais, busca, categorias e guia aparecem unificados em sobreposição quando você quiser.
               </p>
             </button>
 
             <button id="modeCompleteCard" type="button" class="mode-card" data-mode="complete">
               <div class="mode-card-top">
-                <span class="mode-card-badge complete">ðŸ› ï¸ AvanÃ§ado</span>
-                <span class="mode-card-check">âœ“</span>
+                <span class="mode-card-badge complete">🛠️ Avançado</span>
+                <span class="mode-card-check">✓</span>
               </div>
               <div class="mode-card-title">Modo Completo</div>
               <p class="mode-card-desc">
-                Mostra todos os controles na tela: anti-travamento, proxy, botÃµes extras, URL do stream, verificador de canais, GitHub e seletor de arquivos `.m3u8`.
+                Mostra todos os controles na tela: anti-travamento, proxy, botões extras, URL do stream, verificador de canais, GitHub e seletor de arquivos `.m3u8`.
               </p>
             </button>
           </div>
         </div>
 
-        <!-- SeÃ§Ã£o 2: ReproduÃ§Ã£o e Rede -->
+        <!-- Seção 2: Reprodução e Rede -->
         <div class="settings-group">
-          <div class="settings-group-title">ðŸ“¡ ReproduÃ§Ã£o e Rede</div>
+          <div class="settings-group-title">📡 Reprodução e Rede</div>
           <div class="settings-list">
             <label class="settings-row-toggle">
               <div>
-                <div class="settings-row-label">ðŸ›¡ï¸ Anti-Travamento (HLS + ReconexÃ£o ContÃ­nua)</div>
+                <div class="settings-row-label">🛡️ Anti-Travamento (HLS + Reconexão Contínua)</div>
                 <div class="settings-row-hint">Converte streams .ts Xtream para HLS segmentado para evitar cortes de 3s.</div>
               </div>
               <input type="checkbox" id="cfgSmartHlsToggle" checked />
@@ -657,58 +649,58 @@
 
             <label class="settings-row-toggle">
               <div>
-                <div class="settings-row-label">ðŸŒ Usar Proxy Local (Evita bloqueio CORS)</div>
-                <div class="settings-row-hint">Roteia os fluxos pelo servidor local com cabeÃ§alhos compatÃ­veis.</div>
+                <div class="settings-row-label">🌐 Usar Proxy Local (Evita bloqueio CORS)</div>
+                <div class="settings-row-hint">Roteia os fluxos pelo servidor local com cabeçalhos compatíveis.</div>
               </div>
               <input type="checkbox" id="cfgUseProxyToggle" checked />
             </label>
           </div>
 
-          <!-- AÃ§Ãµes rÃ¡pidas para o canal atualmente em reproduÃ§Ã£o -->
+          <!-- Ações rápidas para o canal atualmente em reprodução -->
           <div id="cfgCurrentStreamBox" class="settings-stream-quick hidden">
             <div class="settings-stream-header">
-              <span>ðŸ“º Canal em reproduÃ§Ã£o: <strong id="cfgCurrentStreamName">-</strong></span>
+              <span>📺 Canal em reprodução: <strong id="cfgCurrentStreamName">-</strong></span>
             </div>
             <div class="settings-quick-actions">
-              <button id="cfgRetryStreamBtn" type="button" class="btn-glass-secondary">ðŸ”„ Reconectar</button>
-              <button id="cfgForceTsBtn" type="button" class="btn-glass-secondary">âš¡ Modo TS</button>
-              <button id="cfgCopyUrlBtn" type="button" class="btn-glass-secondary">ðŸ“‹ Copiar Link</button>
-              <a id="cfgOpenExternalBtn" href="#" target="_blank" rel="noopener" class="btn-glass-secondary">ðŸ”— Abrir Direto</a>
+              <button id="cfgRetryStreamBtn" type="button" class="btn-glass-secondary">🔄 Reconectar</button>
+              <button id="cfgForceTsBtn" type="button" class="btn-glass-secondary">⚡ Modo TS</button>
+              <button id="cfgCopyUrlBtn" type="button" class="btn-glass-secondary">📋 Copiar Link</button>
+              <a id="cfgOpenExternalBtn" href="#" target="_blank" rel="noopener" class="btn-glass-secondary">🔗 Abrir Direto</a>
             </div>
           </div>
         </div>
 
-        <!-- SeÃ§Ã£o 3: Guia de ProgramaÃ§Ã£o (EPG) -->
+        <!-- Seção 3: Guia de Programação (EPG) -->
         <div class="settings-group">
-          <div class="settings-group-title">ðŸ“… Guia de ProgramaÃ§Ã£o (EPG)</div>
+          <div class="settings-group-title">📅 Guia de Programação (EPG)</div>
           <div class="settings-list">
             <label class="settings-row-toggle">
               <div>
-                <div class="settings-row-label">Agrupar variaÃ§Ãµes HD / FHD / H.265</div>
-                <div class="settings-row-hint">Exibe uma Ãºnica linha por canal no Guia, priorizando a melhor fonte online.</div>
+                <div class="settings-row-label">Agrupar variações HD / FHD / H.265</div>
+                <div class="settings-row-hint">Exibe uma única linha por canal no Guia, priorizando a melhor fonte online.</div>
               </div>
               <input type="checkbox" id="cfgEpgDedupeToggle" checked />
             </label>
 
             <label class="settings-row-toggle">
               <div>
-                <div class="settings-row-label">Mostrar apenas canais com guia disponÃ­vel</div>
-                <div class="settings-row-hint">Oculta canais sem grade EPG cadastrada no modo Guia de ProgramaÃ§Ã£o.</div>
+                <div class="settings-row-label">Mostrar apenas canais com guia disponível</div>
+                <div class="settings-row-hint">Oculta canais sem grade EPG cadastrada no modo Guia de Programação.</div>
               </div>
               <input type="checkbox" id="cfgEpgOnlyWithGuideToggle" />
             </label>
           </div>
           <div class="settings-inline-actions">
-            <button id="cfgRefreshEpgBtn" type="button" class="btn-glass-secondary">ðŸ”„ Atualizar Guia EPG Agora</button>
+            <button id="cfgRefreshEpgBtn" type="button" class="btn-glass-secondary">🔄 Atualizar Guia EPG Agora</button>
           </div>
         </div>
 
-        <!-- SeÃ§Ã£o 4: Ferramentas, Verificador e Listas -->
+        <!-- Seção 4: Ferramentas, Verificador e Listas -->
         <div class="settings-group">
-          <div class="settings-group-title">ðŸ§° Ferramentas, Scanner & Listas</div>
+          <div class="settings-group-title">🧰 Ferramentas, Scanner & Listas</div>
           <div class="settings-tools-grid">
             <button id="cfgOpenScannerBtn" type="button" class="settings-tool-btn">
-              <span class="round-icon icon-violet">âš¡</span>
+              <span class="round-icon icon-violet">⚡</span>
               <div class="settings-tool-text">
                 <strong>Verificador de Canais Ao Vivo</strong>
                 <span>Testar canais online/offline em lote</span>
@@ -716,16 +708,16 @@
             </button>
 
             <button id="cfgOpenGithubBtn" type="button" class="settings-tool-btn">
-              <span class="round-icon icon-blue">ðŸ”„</span>
+              <span class="round-icon icon-blue">🔄</span>
               <div class="settings-tool-text">
-                <strong>SincronizaÃ§Ã£o GitHub</strong>
-                <span id="cfgGithubStatusText">Verificar atualizaÃ§Ãµes das listas</span>
+                <strong>Sincronização GitHub</strong>
+                <span id="cfgGithubStatusText">Verificar atualizações das listas</span>
               </div>
             </button>
           </div>
 
           <div class="settings-file-picker">
-            <label for="cfgPlaylistSelect" class="section-label">Abrir Arquivo de Lista (.m3u8) EspecÃ­fico</label>
+            <label for="cfgPlaylistSelect" class="section-label">Abrir Arquivo de Lista (.m3u8) Específico</label>
             <select id="cfgPlaylistSelect" class="select-input"></select>
           </div>
         </div>
@@ -733,26 +725,26 @@
     </div>
   </div>
 
-  <!-- Barra de NavegaÃ§Ã£o Inferior em Vidro (Exclusiva para Mobile/Tablet) -->
-  <nav class="mobile-bottom-nav glass-panel mobile-only" aria-label="NavegaÃ§Ã£o Mobile">
+  <!-- Barra de Navegação Inferior em Vidro (Exclusiva para Mobile/Tablet) -->
+  <nav class="mobile-bottom-nav glass-panel mobile-only" aria-label="Navegação Mobile">
     <button class="mobile-nav-item" id="mobNavOnline">
-      <span class="mob-nav-icon">âœ…</span>
+      <span class="mob-nav-icon">✅</span>
       <span class="mob-nav-label">Online</span>
     </button>
     <button class="mobile-nav-item active" id="mobNavLiveBR">
-      <span class="mob-nav-icon">ðŸ‡§ðŸ‡·</span>
+      <span class="mob-nav-icon">🇧🇷</span>
       <span class="mob-nav-label">Ao Vivo BR</span>
     </button>
     <button class="mobile-nav-item" id="mobNavCategories">
-      <span class="mob-nav-icon">ðŸ“‚</span>
+      <span class="mob-nav-icon">📂</span>
       <span class="mob-nav-label">Categorias</span>
     </button>
     <button class="mobile-nav-item" id="mobNavScanner">
-      <span class="mob-nav-icon">âš¡</span>
+      <span class="mob-nav-icon">⚡</span>
       <span class="mob-nav-label">Verificar</span>
     </button>
     <button class="mobile-nav-item" id="mobNavFavs">
-      <span class="mob-nav-icon">â­</span>
+      <span class="mob-nav-icon">⭐</span>
       <span class="mob-nav-label">Favoritos</span>
     </button>
   </nav>

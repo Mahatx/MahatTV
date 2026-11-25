@@ -1,4 +1,4 @@
-﻿/* Mini Card de SincronizaÃ§Ã£o GitHub na Sidebar */
+/* Mini Card de Sincronização GitHub na Sidebar */
 .github-mini-card {
   margin-top: 4px;
   padding: 10px 12px;
@@ -237,7 +237,7 @@
   gap: 10px;
 }
 
-/* BotÃµes Glass */
+/* Botões Glass */
 .btn-glass-primary,
 .btn-glass-danger,
 .btn-glass-success,

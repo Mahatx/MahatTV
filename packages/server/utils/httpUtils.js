@@ -13,7 +13,9 @@ const MIME_TYPES = {
   '.webp': 'image/webp',
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
-  '.woff2': 'font/woff2'
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+  '.ttf': 'font/ttf'
 };
 
 function sendJson(res, statusCode, data) {
@@ -42,19 +44,26 @@ function readJsonBody(req) {
 
 function serveStaticFile(pathname, paths, res) {
   const cleanRel = pathname === '/' ? 'index.html' : pathname.replace(/^\/+/, '');
-  const candidates = [
-    path.resolve(paths.uiDir, cleanRel),
-    path.resolve(paths.uiPublicDir, cleanRel)
-  ];
+  const hasDist = fs.existsSync(path.join(paths.uiDistDir, 'index.html'));
 
-  for (const candidate of candidates) {
-    const insideUi = candidate.startsWith(path.resolve(paths.uiDir));
-    if (!insideUi) continue;
+  const searchBases = hasDist
+    ? [paths.uiDistDir, paths.uiPublicDir]
+    : [paths.uiDir, paths.uiPublicDir];
+
+  for (const baseDir of searchBases) {
+    const resolvedBase = path.resolve(baseDir);
+    const candidate = path.resolve(resolvedBase, cleanRel);
+    if (!candidate.startsWith(resolvedBase)) continue;
     if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
       const ext = path.extname(candidate).toLowerCase();
+      const isImmutableAsset = cleanRel.startsWith('assets/');
       res.writeHead(200, {
         'Content-Type': MIME_TYPES[ext] || 'application/octet-stream',
-        'Cache-Control': ext === '.png' || ext === '.ico' ? 'public, max-age=3600' : 'no-cache'
+        'Cache-Control': isImmutableAsset
+          ? 'public, max-age=31536000, immutable'
+          : ext === '.png' || ext === '.ico'
+          ? 'public, max-age=3600'
+          : 'no-cache'
       });
       return fs.createReadStream(candidate).pipe(res);
     }

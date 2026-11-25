@@ -17,6 +17,7 @@ function resolvePaths(overrides = {}) {
     overrides.uiDir ||
     process.env.MAHATTV_UI_DIR ||
     path.join(rootDir, 'packages', 'ui');
+  const uiDistDir = path.join(uiDir, 'dist');
   const uiPublicDir = path.join(uiDir, 'public');
 
   if (!fs.existsSync(playlistsDir)) {
@@ -31,6 +32,7 @@ function resolvePaths(overrides = {}) {
     playlistsDir,
     dataDir,
     uiDir,
+    uiDistDir,
     uiPublicDir,
     verifiedJsonPath: path.join(dataDir, 'verified-streams.json'),
     onlineM3u8Path: path.join(playlistsDir, 'Canais-Online.m3u8'),
