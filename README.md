@@ -58,10 +58,13 @@ npm run build:desktop
 
 ### 📱 Aplicativo Mobile (Android / Capacitor)
 ```powershell
-# Sincronizar build da UI para o projeto nativo Android
+# Compilar o APK diretamente no seu PC (gera release/MahatTV-debug.apk)
+npm run build:apk
+
+# Apenas sincronizar o build da UI com o projeto nativo Android
 npm run mobile:sync
 
-# Abrir projeto Android no Android Studio para gerar o APK
+# Abrir projeto Android no Android Studio (opcional)
 npm run mobile:android
 ```
 * **Modo Autônomo (Standalone)**: funciona direto no celular usando `CapacitorHttp` nativo (sem CORS).

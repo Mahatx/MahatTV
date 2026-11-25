@@ -17,7 +17,8 @@
     "build:desktop": "npm run build:ui && electron-builder --config apps/desktop/electron-builder.yml",
     "build:desktop:dir": "npm run build:ui && electron-builder --dir --config apps/desktop/electron-builder.yml",
     "mobile:sync": "npm run build:ui && node scripts/mobile.js sync",
-    "mobile:android": "npm run build:ui && node scripts/mobile.js open android"
+    "mobile:android": "npm run build:ui && node scripts/mobile.js open android",
+    "build:apk": "npm run mobile:sync && node scripts/build-apk.js"
   },
   "dependencies": {
     "@capacitor/app": "^7.0.1",
