@@ -48,17 +48,17 @@ export const apiClient = {
     platformBridge.isStandaloneMobile() ? mobileLocalEngine.getScannerStatus() : requestJson('/api/scanner/status'),
 
   startScanner: (payload) =>
-    platformBridge.isStandaloneMobile() ? mobileLocalEngine.getScannerStatus() : postJson('/api/scanner/start', payload),
+    platformBridge.isStandaloneMobile() ? mobileLocalEngine.startScanner(payload) : postJson('/api/scanner/start', payload),
 
   stopScanner: () =>
-    platformBridge.isStandaloneMobile() ? mobileLocalEngine.getScannerStatus() : postJson('/api/scanner/stop'),
+    platformBridge.isStandaloneMobile() ? mobileLocalEngine.stopScanner() : postJson('/api/scanner/stop'),
 
   clearScanner: () =>
-    platformBridge.isStandaloneMobile() ? mobileLocalEngine.getScannerStatus() : postJson('/api/scanner/clear'),
+    platformBridge.isStandaloneMobile() ? mobileLocalEngine.clearScanner() : postJson('/api/scanner/clear'),
 
   checkSingleChannel: (item, forceStatus) =>
     platformBridge.isStandaloneMobile()
-      ? Promise.resolve({ url: item.url, status: forceStatus || 'online' })
+      ? mobileLocalEngine.checkSingleChannel(item, forceStatus)
       : postJson('/api/scanner/check-one', { item, forceStatus }),
 
   getGithubStatus: (force = false) =>
