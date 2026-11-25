@@ -1,0 +1,683 @@
+﻿/* =========================================================
+   GUIA DE PROGRAMAÃ‡ÃƒO (EPG) â€¢ ESTILO LIQUID GLASS
+   ========================================================= */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cat-sort-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  border-radius: var(--radius-pill);
+  padding: 3px 9px;
+  font-family: inherit;
+  font-size: 10.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.cat-sort-btn:hover {
+  background: rgba(56, 189, 248, 0.16);
+  border-color: rgba(56, 189, 248, 0.45);
+  color: #fff;
+}
+
+.sort-label-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.sort-control-box {
+  display: inline-flex;
+  align-items: center;
+}
+
+.sort-select {
+  background: rgba(15, 23, 42, 0.68);
+  backdrop-filter: blur(14px);
+  color: var(--text-primary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  padding: 8px 14px;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.sort-select:hover,
+.sort-select:focus {
+  border-color: rgba(56, 189, 248, 0.55);
+  background: rgba(30, 41, 59, 0.78);
+}
+
+.sort-select option {
+  background: #0f172a;
+  color: #f8fafc;
+}
+
+.results-right {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.view-mode-switch {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: var(--radius-pill);
+  background: rgba(15, 23, 42, 0.62);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(14px);
+  gap: 4px;
+}
+
+.view-mode-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.view-mode-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.view-mode-btn.active {
+  color: #fff;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.34), rgba(139, 92, 246, 0.34));
+  border-color: rgba(56, 189, 248, 0.52);
+  box-shadow: 0 6px 18px -6px rgba(56, 189, 248, 0.45);
+}
+
+/* Mini EPG no Card do Canal */
+.card-epg-now {
+  margin-top: 3px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card-epg-text {
+  font-size: 11px;
+  color: #7dd3fc;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-epg-bar {
+  width: 100%;
+  height: 3px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.card-epg-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-violet));
+  border-radius: var(--radius-pill);
+}
+
+/* Mini EPG dentro do Player */
+.player-epg-box {
+  background: rgba(15, 23, 42, 0.58);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  border-radius: 16px;
+  padding: 11px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.player-epg-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.player-epg-tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: #7dd3fc;
+}
+
+.player-epg-time {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.player-epg-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.player-epg-progress-bg {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.player-epg-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #38bdf8, #8b5cf6);
+  border-radius: var(--radius-pill);
+}
+
+.player-epg-desc {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.player-epg-next {
+  font-size: 11px;
+  color: #cbd5e1;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Painel Principal do Guia de ProgramaÃ§Ã£o (Timeline) */
+.epg-guide-section {
+  border-radius: var(--radius-xl);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.epg-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.epg-toolbar-info h3 {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+}
+
+.epg-subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 3px;
+}
+
+.epg-toolbar-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.epg-time-nav,
+.epg-filter-toggles {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.epg-nav-btn {
+  padding: 7px 13px !important;
+  font-size: 12px !important;
+}
+
+.epg-toggle {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  padding: 6px 11px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+/* CartÃ£o de Detalhes do Programa */
+.epg-detail-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.82), rgba(30, 41, 59, 0.65));
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.6);
+}
+
+.epg-detail-thumb {
+  width: 132px;
+  height: 76px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  flex-shrink: 0;
+}
+
+.epg-detail-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.epg-detail-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 11.5px;
+}
+
+.epg-detail-channel {
+  font-weight: 800;
+  color: #7dd3fc;
+}
+
+.epg-detail-time {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.epg-detail-cat {
+  background: rgba(139, 92, 246, 0.24);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  color: #ddd6fe;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.epg-detail-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.epg-detail-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.epg-detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Container com scroll horizontal e vertical da Grade EPG */
+.epg-timeline-container {
+  border-radius: 18px;
+  border: 1px solid var(--glass-border);
+  background: rgba(6, 9, 19, 0.52);
+  overflow: auto;
+  max-height: 68vh;
+  position: relative;
+}
+
+.epg-grid-inner {
+  position: relative;
+  min-width: 1100px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* CabeÃ§alho fixo com RÃ©gua de HorÃ¡rios */
+.epg-ruler-row {
+  display: flex;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(10, 15, 29, 0.94);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--glass-border-highlight);
+}
+
+.epg-corner-cell {
+  width: 220px;
+  min-width: 220px;
+  position: sticky;
+  left: 0;
+  z-index: 25;
+  background: rgba(10, 15, 29, 0.98);
+  border-right: 1px solid var(--glass-border);
+  padding: 11px 14px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.epg-ruler-track {
+  position: relative;
+  flex: 1;
+  height: 40px;
+}
+
+.epg-time-tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 1px dashed rgba(255, 255, 255, 0.1);
+  padding: 11px 0 0 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.epg-now-pill {
+  position: absolute;
+  top: 6px;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #f43f5e, #ec4899);
+  color: #fff;
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 0 12px rgba(244, 63, 94, 0.65);
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* Linhas de Canais no Guia */
+.epg-row {
+  display: flex;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  min-height: 70px;
+  transition: background 0.15s ease;
+}
+
+.epg-row:hover {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.epg-row.is-playing {
+  background: rgba(16, 185, 129, 0.07);
+}
+
+.epg-channel-cell {
+  width: 220px;
+  min-width: 220px;
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  background: rgba(12, 18, 34, 0.94);
+  backdrop-filter: blur(14px);
+  border-right: 1px solid var(--glass-border);
+  padding: 9px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.epg-channel-cell:hover {
+  background: rgba(30, 41, 59, 0.95);
+}
+
+.epg-ch-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 4px;
+  flex-shrink: 0;
+}
+
+.epg-ch-logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.epg-ch-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.epg-ch-name {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.epg-ch-sub {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.epg-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.epg-status-dot.online {
+  background: var(--success);
+  box-shadow: 0 0 6px var(--success);
+}
+
+.epg-status-dot.offline {
+  background: var(--danger);
+}
+
+.epg-variants-pill {
+  background: rgba(56, 189, 248, 0.15);
+  color: #7dd3fc;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+}
+
+/* Trilha de Programas */
+.epg-track {
+  position: relative;
+  flex: 1;
+  min-height: 70px;
+}
+
+.epg-now-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, #f43f5e, rgba(244, 63, 94, 0.35));
+  box-shadow: 0 0 10px rgba(244, 63, 94, 0.6);
+  z-index: 6;
+  pointer-events: none;
+}
+
+.epg-prog-block {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  border-radius: 12px;
+  padding: 7px 10px;
+  background: rgba(30, 41, 59, 0.56);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.epg-prog-block:hover {
+  background: rgba(51, 65, 85, 0.78);
+  border-color: rgba(56, 189, 248, 0.55);
+  z-index: 4;
+}
+
+.epg-prog-block.is-now {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.24), rgba(99, 102, 241, 0.26));
+  border-color: rgba(56, 189, 248, 0.52);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.epg-prog-block.is-selected {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 1.5px #38bdf8;
+  z-index: 5;
+}
+
+.epg-prog-block.is-past {
+  opacity: 0.58;
+}
+
+.epg-prog-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.epg-prog-time {
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.epg-prog-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.epg-prog-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #38bdf8, #f43f5e);
+}
+
+.epg-no-data-bar {
+  position: absolute;
+  inset: 8px;
+  border-radius: 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.3);
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.epg-no-data-bar:hover {
+  border-color: rgba(56, 189, 248, 0.35);
+  color: var(--text-secondary);
+}
+
+.epg-empty-state {
+  padding: 44px 20px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 13.5px;
+}
+
+@media (max-width: 720px) {
+  .epg-corner-cell,
+  .epg-channel-cell {
+    width: 145px;
+    min-width: 145px;
+    padding: 8px;
+  }
+
+  .epg-ch-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+  }
+
+  .epg-detail-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .epg-detail-thumb {
+    width: 100%;
+    height: 130px;
+  }
+
+  .epg-detail-actions {
+    justify-content: flex-end;
+  }
+}
+
+

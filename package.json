@@ -1,0 +1,11 @@
+{
+  "name": "mahattv",
+  "version": "2.0.0",
+  "description": "MahatTV • Glass Stream Player (Arquitetura Modular pronta para Web, Desktop e Mobile)",
+  "private": true,
+  "main": "packages/server/index.js",
+  "scripts": {
+    "start": "node packages/server/index.js",
+    "dev": "node --watch packages/server/index.js"
+  }
+}

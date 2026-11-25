@@ -1,0 +1,548 @@
+﻿/* =========================================================
+   MODO TV IMERSIVO (MODO SIMPLES COM CANAL ABERTO) + SOBREPOSIÃ‡ÃƒO UNIFICADA
+   ========================================================= */
+.browse-workspace {
+  display: contents;
+}
+
+.tv-top-hud,
+.tv-overlay-backdrop,
+.tv-overlay-header,
+.tv-error-toast {
+  display: none;
+}
+
+/* Modal de ConfiguraÃ§Ãµes sempre acima da TV e da sobreposiÃ§Ã£o */
+.settings-backdrop {
+  z-index: 300;
+}
+
+/* Quando estÃ¡ no Modo Simples com um canal aberto: experiÃªncia 100% TV */
+body.ui-simple.tv-active .app-layout {
+  z-index: auto;
+}
+
+body.ui-simple.tv-active #playerSection {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 50;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: #000;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+body.ui-simple.tv-active #playerSection .player-container {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+body.ui-simple.tv-active #playerSection .player-info {
+  display: none !important;
+}
+
+body.ui-simple.tv-active #playerSection .video-wrapper {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  background: #000;
+}
+
+body.ui-simple.tv-active #videoPlayer {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* HUD Superior estilo Smart TV (auto-oculta junto com controls-idle) */
+body.ui-simple.tv-active .tv-top-hud {
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 15;
+  padding: 18px 22px 34px;
+  background: linear-gradient(180deg, rgba(4, 7, 16, 0.88) 0%, rgba(4, 7, 16, 0.48) 68%, rgba(4, 7, 16, 0) 100%);
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+body.ui-simple.tv-active .video-wrapper.controls-idle .tv-top-hud {
+  opacity: 0;
+  transform: translateY(-12px);
+  pointer-events: none;
+}
+
+.tv-hud-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  max-width: min(620px, 60vw);
+}
+
+.tv-hud-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  flex-shrink: 0;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+}
+
+.tv-hud-logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.tv-hud-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.tv-hud-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.tv-hud-live-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  background: rgba(16, 185, 129, 0.22);
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  color: #6ee7b7;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.tv-hud-title {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.65);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tv-hud-category {
+  font-size: 12px;
+  color: rgba(226, 232, 240, 0.78);
+  font-weight: 600;
+}
+
+.tv-hud-epg {
+  margin-top: 3px;
+  padding: 7px 11px;
+  border-radius: 12px;
+  background: rgba(10, 15, 29, 0.62);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 440px;
+}
+
+.tv-hud-epg-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.tv-hud-epg-title {
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tv-hud-epg-time {
+  font-size: 11px;
+  color: #7dd3fc;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.tv-hud-epg-bar {
+  width: 100%;
+  height: 3.5px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+}
+
+.tv-hud-epg-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #38bdf8, #f43f5e);
+}
+
+.tv-hud-epg-next {
+  font-size: 10.5px;
+  color: rgba(203, 213, 225, 0.86);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tv-hud-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.tv-zap-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  border-radius: var(--radius-pill);
+  background: rgba(10, 15, 29, 0.65);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.tv-hud-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 40px;
+  padding: 0 15px;
+  border-radius: var(--radius-pill);
+  background: rgba(10, 15, 29, 0.68);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+.tv-hud-btn:hover {
+  background: rgba(30, 41, 59, 0.88);
+  border-color: rgba(56, 189, 248, 0.55);
+  transform: translateY(-1px);
+}
+
+.tv-hud-btn.tv-hud-icon {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  font-size: 15px;
+}
+
+.tv-zap-group .tv-hud-btn.tv-hud-icon {
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.tv-zap-group .tv-hud-btn.tv-hud-icon:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.tv-hud-btn.tv-hud-primary {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.78), rgba(99, 102, 241, 0.82));
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.tv-hud-btn.tv-hud-danger:hover {
+  background: rgba(244, 63, 94, 0.75);
+  border-color: rgba(251, 113, 133, 0.65);
+}
+
+.tv-hud-btn.favorited {
+  color: #facc15;
+  border-color: rgba(250, 204, 21, 0.55);
+  background: rgba(250, 204, 21, 0.16);
+}
+
+/* Barra inferior de controles ainda mais elegante no Modo TV */
+body.ui-simple.tv-active .custom-video-controls {
+  left: 22px;
+  right: 22px;
+  bottom: 20px;
+  padding: 11px 18px;
+  border-radius: 22px;
+}
+
+/* Toast de Erro Flutuante no Modo TV */
+body.ui-simple.tv-active .tv-error-toast:not(.hidden) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 18;
+  width: min(440px, calc(100% - 32px));
+  padding: 22px;
+  border-radius: 22px;
+  background: rgba(12, 18, 34, 0.88);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(244, 63, 94, 0.45);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
+}
+
+.tv-error-icon {
+  font-size: 28px;
+}
+
+.tv-error-text {
+  font-size: 13px;
+  color: #fecdd3;
+  line-height: 1.45;
+}
+
+.tv-error-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Ocultar listas, sidebar, busca e dock mobile quando estiver assistindo TV sem sobreposiÃ§Ã£o */
+body.ui-simple.tv-active:not(.tv-overlay-open) .sidebar,
+body.ui-simple.tv-active:not(.tv-overlay-open) .mobile-bottom-nav {
+  opacity: 0;
+  pointer-events: none;
+}
+
+body.ui-simple.tv-active:not(.tv-overlay-open) #browseWorkspace {
+  display: none !important;
+}
+
+/* =========================================================
+   SOBREPOSIÃ‡ÃƒO UNIFICADA DE CANAIS, BUSCA, CATEGORIAS E GUIA SOBRE A TV
+   ========================================================= */
+body.ui-simple.tv-active.tv-overlay-open .tv-overlay-backdrop {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(4, 7, 16, 0.56);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: tvOverlayFade 0.18s ease;
+}
+
+@keyframes tvOverlayFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+body.ui-simple.tv-active.tv-overlay-open .tv-overlay-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  right: 14px;
+  height: 58px;
+  padding: 0 16px;
+  border-radius: 20px;
+  z-index: 105;
+  background: rgba(12, 18, 34, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.tv-overlay-header-left {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+}
+
+.tv-overlay-brand-img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.tv-overlay-title-wrap {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.tv-overlay-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.tv-overlay-now {
+  font-size: 11.5px;
+  color: #6ee7b7;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tv-return-btn {
+  padding: 8px 16px !important;
+  border-radius: var(--radius-pill) !important;
+  font-size: 12.5px !important;
+}
+
+/* Sidebar + Ãrea de Busca/Grade/Guia unificadas flutuando sobre o canal ao vivo */
+body.ui-simple.tv-active.tv-overlay-open .sidebar {
+  position: fixed;
+  top: 84px;
+  bottom: 14px;
+  left: 14px;
+  width: 300px;
+  min-width: 300px;
+  z-index: 100;
+  background: rgba(12, 18, 34, 0.84);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+body.ui-simple.tv-active.tv-overlay-open #browseWorkspace {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: fixed;
+  top: 84px;
+  bottom: 14px;
+  left: 326px;
+  right: 14px;
+  z-index: 100;
+  overflow-y: auto;
+  padding: 14px;
+  border-radius: var(--radius-xl);
+  background: rgba(10, 15, 29, 0.8);
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+}
+
+/* Responsividade da TV e SobreposiÃ§Ã£o Unificada no Mobile */
+@media (max-width: 960px) {
+  body.ui-simple.tv-active .tv-top-hud {
+    padding: 12px 12px 24px;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  body.ui-simple.tv-active .tv-hud-left {
+    max-width: 100%;
+  }
+
+  body.ui-simple.tv-active .tv-hud-logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+  }
+
+  body.ui-simple.tv-active .tv-hud-title {
+    font-size: 16px;
+  }
+
+  body.ui-simple.tv-active .tv-hud-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  body.ui-simple.tv-active .tv-hud-btn-label {
+    display: none;
+  }
+
+  body.ui-simple.tv-active .custom-video-controls {
+    left: 10px;
+    right: 10px;
+    bottom: 12px;
+  }
+
+  body.ui-simple.tv-active.tv-overlay-open .tv-overlay-header {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    height: 52px;
+    padding: 0 12px;
+  }
+
+  body.ui-simple.tv-active.tv-overlay-open #browseWorkspace {
+    top: 68px;
+    bottom: 8px;
+    left: 8px;
+    right: 8px;
+    padding: 10px;
+    border-radius: 20px;
+  }
+
+  body.ui-simple.tv-active.tv-overlay-open .sidebar {
+    top: 8px;
+    bottom: 8px;
+    left: 8px;
+    z-index: 135;
+    width: min(320px, calc(100vw - 24px));
+    min-width: 0;
+  }
+
+  body.ui-simple.tv-active.tv-overlay-open .sidebar-backdrop {
+    z-index: 125;
+  }
+
+  body.ui-simple.tv-active.tv-overlay-open .mobile-bottom-nav {
+    display: none !important;
+  }
+}
+

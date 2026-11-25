@@ -1,0 +1,14 @@
+# Dependências, builds e artefatos de empacotamento
+node_modules/
+dist/
+release/
+
+# Dados em tempo de execução (listas .m3u8 baixadas via GitHub Sync e caches locais)
+storage/
+
+# Arquivos temporários e ambiente
+*.downloading.tmp
+*.log
+.env
+.DS_Store
+Thumbs.db
