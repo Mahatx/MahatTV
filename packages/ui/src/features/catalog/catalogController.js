@@ -31,9 +31,40 @@ export function createCatalogController({
 
   async function syncFavoritesToServer() {
     try {
-      await apiClient.syncFavorites(state.favorites.map((f) => f.url).filter(Boolean));
+      await apiClient.syncFavorites(state.favorites);
     } catch {
       // Silencioso
+    }
+  }
+
+  async function hydrateFavorites() {
+    try {
+      const data = await apiClient.getFavorites();
+      const serverFavs = Array.isArray(data?.favorites)
+        ? data.favorites.filter((f) => f && typeof f === 'object' && f.url)
+        : [];
+      const merged = new Map();
+      // Carrega primeiro os favoritos salvos no projeto/servidor, depois mescla os locais
+      serverFavs.forEach((f) => merged.set(f.url, f));
+      state.favorites.forEach((f) => {
+        if (f && f.url) merged.set(f.url, f);
+      });
+
+      const mergedArr = Array.from(merged.values());
+      const localChanged = mergedArr.length !== state.favorites.length;
+      const serverNeedsUpdate = mergedArr.length !== serverFavs.length;
+
+      state.favorites = mergedArr;
+      if (localChanged) {
+        localStorage.setItem('iptv_favorites_v1', JSON.stringify(state.favorites));
+      }
+      updateFavCounter();
+
+      if (serverNeedsUpdate && state.favorites.length > 0) {
+        await syncFavoritesToServer();
+      }
+    } catch {
+      // Se offline, mantém apenas favoritos locais
     }
   }
 
@@ -492,6 +523,7 @@ export function createCatalogController({
     selectPlaylist,
     fetchItems,
     toggleFavorite,
-    syncFavoritesToServer
+    syncFavoritesToServer,
+    hydrateFavorites
   };
 }

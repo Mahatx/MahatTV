@@ -2,10 +2,19 @@
 node_modules/
 dist/
 packages/ui/dist/
+packages/ui/public/seed/
 release/
 
-# Dados em tempo de execução (listas .m3u8 baixadas via GitHub Sync e caches locais)
-storage/
+# Dados em runtime: ignora listas brutas (.m3u8 baixadas do GitHub) e cache EPG,
+# mas MANTÉM no Git os canais já verificados, Canais-Online.m3u8 e favoritos!
+storage/*
+!storage/data/
+storage/data/*
+!storage/data/verified-streams.json
+!storage/data/favorites.json
+!storage/playlists/
+storage/playlists/*
+!storage/playlists/Canais-Online.m3u8
 
 # Arquivos temporários e ambiente
 *.downloading.tmp

@@ -4,6 +4,7 @@ const { isLiveChannel } = require('../../core');
 function createStorageService(paths) {
   const verifiedMap = new Map();
   const favoriteUrlsSet = new Set();
+  const favoriteItemsMap = new Map(); // url -> full channel item
   let saveTimer = null;
 
   function saveVerifiedToDisk() {
@@ -78,8 +79,13 @@ function createStorageService(paths) {
       if (fs.existsSync(paths.favoritesJsonPath)) {
         const arr = JSON.parse(fs.readFileSync(paths.favoritesJsonPath, 'utf8'));
         if (Array.isArray(arr)) {
-          arr.forEach((u) => {
-            if (typeof u === 'string' && u) favoriteUrlsSet.add(u);
+          arr.forEach((entry) => {
+            if (typeof entry === 'string' && entry) {
+              favoriteUrlsSet.add(entry);
+            } else if (entry && typeof entry === 'object' && entry.url) {
+              favoriteUrlsSet.add(entry.url);
+              favoriteItemsMap.set(entry.url, entry);
+            }
           });
         }
       }
@@ -90,16 +96,27 @@ function createStorageService(paths) {
 
   function saveFavoritesToDisk() {
     try {
-      fs.writeFileSync(paths.favoritesJsonPath, JSON.stringify(Array.from(favoriteUrlsSet)), 'utf8');
+      const payload = Array.from(favoriteUrlsSet).map((url) => favoriteItemsMap.get(url) || { url });
+      fs.writeFileSync(paths.favoritesJsonPath, JSON.stringify(payload, null, 2), 'utf8');
     } catch {
       // Ignorar erro de escrita
     }
   }
 
-  function syncFavorites(urls = []) {
+  function getFavorites() {
+    return Array.from(favoriteItemsMap.values());
+  }
+
+  function syncFavorites(favoritesOrUrls = []) {
     favoriteUrlsSet.clear();
-    for (const u of urls) {
-      if (typeof u === 'string' && u) favoriteUrlsSet.add(u);
+    favoriteItemsMap.clear();
+    for (const entry of favoritesOrUrls) {
+      if (typeof entry === 'string' && entry) {
+        favoriteUrlsSet.add(entry);
+      } else if (entry && typeof entry === 'object' && entry.url) {
+        favoriteUrlsSet.add(entry.url);
+        favoriteItemsMap.set(entry.url, entry);
+      }
     }
     saveFavoritesToDisk();
     return favoriteUrlsSet.size;
@@ -113,6 +130,7 @@ function createStorageService(paths) {
     favoriteUrlsSet,
     scheduleSaveVerified,
     saveVerifiedToDisk,
+    getFavorites,
     syncFavorites
   };
 }

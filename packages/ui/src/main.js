@@ -136,8 +136,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // Carga inicial
-  catalog.syncFavoritesToServer();
+  // Carga inicial (hidrata favoritos salvos no projeto antes de listar)
+  await catalog.hydrateFavorites();
   await catalog.fetchPlaylists();
   await catalog.selectPlaylist(state.currentPlaylist);
   scanner.pollScannerStatus();

@@ -183,10 +183,14 @@ function createApiRouter(services) {
       return sendJson(res, 200, await githubSyncService.pullGitHubUpdates(body));
     }
 
-    // 4. Favoritos
+    // 4. Favoritos (leitura bidirecional + persistência em storage/data/favorites.json)
+    if (pathname === '/api/favorites' && req.method === 'GET') {
+      return sendJson(res, 200, { favorites: storageService.getFavorites() });
+    }
     if (pathname === '/api/favorites/sync' && req.method === 'POST') {
       const body = await readJsonBody(req);
-      const count = Array.isArray(body.urls) ? storageService.syncFavorites(body.urls) : storageService.favoriteUrlsSet.size;
+      const list = Array.isArray(body.favorites) ? body.favorites : Array.isArray(body.urls) ? body.urls : null;
+      const count = list !== null ? storageService.syncFavorites(list) : storageService.favoriteUrlsSet.size;
       return sendJson(res, 200, { count });
     }
 

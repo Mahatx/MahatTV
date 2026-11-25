@@ -15,6 +15,8 @@ const VERIFIED_STORAGE_KEY = 'mahattv_mobile_verified_v1';
 
 const cache = new Map();
 const verifiedMap = new Map(); // url -> { url, status, checkedAt, statusCode, reason, item }
+let seedLoadedPromise = null;
+let seededFavorites = [];
 
 function loadVerifiedFromStorage() {
   try {
@@ -31,6 +33,43 @@ function loadVerifiedFromStorage() {
   } catch {
     // Ignorar cache corrompido
   }
+}
+
+function ensureSeedLoaded() {
+  if (seedLoadedPromise) return seedLoadedPromise;
+  seedLoadedPromise = (async () => {
+    try {
+      const res = await fetch('./seed/verified-online.json');
+      if (res.ok) {
+        const arr = await res.json();
+        if (Array.isArray(arr)) {
+          let added = 0;
+          for (const entry of arr) {
+            if (entry && entry.url && entry.item && !verifiedMap.has(entry.url)) {
+              verifiedMap.set(entry.url, entry);
+              added++;
+            }
+          }
+          if (added > 0) saveVerifiedToStorage(false);
+        }
+      }
+    } catch {
+      // Seed opcional
+    }
+
+    try {
+      const resFav = await fetch('./seed/favorites.json');
+      if (resFav.ok) {
+        const favs = await resFav.json();
+        if (Array.isArray(favs)) {
+          seededFavorites = favs.filter((f) => f && typeof f === 'object' && f.url);
+        }
+      }
+    } catch {
+      // Seed opcional
+    }
+  })();
+  return seedLoadedPromise;
 }
 
 let saveTimer = null;
@@ -334,7 +373,13 @@ async function checkSingleStreamMobile(streamUrl) {
 }
 
 export const mobileLocalEngine = {
+  async getFavorites() {
+    await ensureSeedLoaded();
+    return { favorites: seededFavorites };
+  },
+
   async getPlaylists() {
+    await ensureSeedLoaded();
     return {
       playlists: MOBILE_PLAYLISTS.map((p) => ({ ...p, loaded: cache.has(p.name) })),
       scanner: getScannerSummary()
@@ -342,6 +387,7 @@ export const mobileLocalEngine = {
   },
 
   async getCategories(playlistName) {
+    await ensureSeedLoaded();
     const data = await ensurePlaylistLoaded(playlistName);
     const categories = Array.from(data.categories.entries())
       .map(([name, count]) => ({ name, count }))
@@ -356,6 +402,7 @@ export const mobileLocalEngine = {
   },
 
   async getItems(params) {
+    await ensureSeedLoaded();
     const data = await ensurePlaylistLoaded(params.playlist || '__LIVE_BR__');
     let list = data.items.map((it) => {
       const v = verifiedMap.get(it.url);

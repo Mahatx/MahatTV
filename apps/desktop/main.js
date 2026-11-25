@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 const { app, BrowserWindow, ipcMain, shell, Menu } = require('electron');
 const { startServer } = require('../../packages/server/app');
@@ -20,16 +21,39 @@ if (!gotLock) {
 }
 
 function getRuntimeDirs() {
+  const repoRoot = path.resolve(__dirname, '..', '..');
+
   if (app.isPackaged) {
     const userData = app.getPath('userData');
+    const playlistsDir = path.join(userData, 'playlists');
+    const dataDir = path.join(userData, 'data');
+
+    fs.mkdirSync(playlistsDir, { recursive: true });
+    fs.mkdirSync(dataDir, { recursive: true });
+
+    // Na primeira execução em um novo PC, copia canais verificados e favoritos empacotados
+    const seedPairs = [
+      [path.join(repoRoot, 'storage', 'data', 'verified-streams.json'), path.join(dataDir, 'verified-streams.json')],
+      [path.join(repoRoot, 'storage', 'data', 'favorites.json'), path.join(dataDir, 'favorites.json')],
+      [path.join(repoRoot, 'storage', 'playlists', 'Canais-Online.m3u8'), path.join(playlistsDir, 'Canais-Online.m3u8')]
+    ];
+    for (const [src, dest] of seedPairs) {
+      try {
+        if (!fs.existsSync(dest) && fs.existsSync(src)) {
+          fs.copyFileSync(src, dest);
+        }
+      } catch (err) {
+        console.warn('[MahatTV Desktop] Aviso ao copiar seed inicial:', err.message);
+      }
+    }
+
     return {
-      playlistsDir: path.join(userData, 'playlists'),
-      dataDir: path.join(userData, 'data'),
+      playlistsDir,
+      dataDir,
       uiDir: path.join(__dirname, '..', '..', 'packages', 'ui')
     };
   }
 
-  const repoRoot = path.resolve(__dirname, '..', '..');
   return {
     playlistsDir: path.join(repoRoot, 'storage', 'playlists'),
     dataDir: path.join(repoRoot, 'storage', 'data'),

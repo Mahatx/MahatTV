@@ -15,6 +15,9 @@ files:
   - packages/core/**/*
   - packages/server/**/*
   - packages/ui/dist/**/*
+  - storage/data/verified-streams.json
+  - storage/data/favorites.json
+  - storage/playlists/Canais-Online.m3u8
   - '!**/node_modules/**/*'
 
 asar: true

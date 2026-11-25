@@ -41,8 +41,13 @@ export const apiClient = {
       ? mobileLocalEngine.getItems(params)
       : requestJson(`/api/items?${new URLSearchParams(params).toString()}`),
 
-  syncFavorites: (urls) =>
-    platformBridge.isStandaloneMobile() ? Promise.resolve({ count: urls.length }) : postJson('/api/favorites/sync', { urls }),
+  getFavorites: () =>
+    platformBridge.isStandaloneMobile() ? mobileLocalEngine.getFavorites() : requestJson('/api/favorites'),
+
+  syncFavorites: (favorites) =>
+    platformBridge.isStandaloneMobile()
+      ? Promise.resolve({ count: favorites.length })
+      : postJson('/api/favorites/sync', { favorites }),
 
   getScannerStatus: () =>
     platformBridge.isStandaloneMobile() ? mobileLocalEngine.getScannerStatus() : requestJson('/api/scanner/status'),
