@@ -1,16 +1,21 @@
 {
   "name": "mahattv",
-  "version": "2.1.0",
-  "description": "MahatTV • Glass Stream Player (Arquitetura Modular pronta para Web, Desktop e Mobile)",
+  "version": "2.2.0",
+  "description": "MahatTV • Glass Stream Player (Web, Desktop & Mobile)",
+  "author": "Mahatx",
   "private": true,
-  "main": "packages/server/index.js",
+  "main": "apps/desktop/main.js",
   "scripts": {
     "start": "node packages/server/index.js",
     "build": "npm run build:ui",
     "build:ui": "vite build --config packages/ui/vite.config.js",
     "dev": "node scripts/dev.js",
     "dev:server": "node --watch packages/server/index.js",
-    "dev:ui": "vite --config packages/ui/vite.config.js"
+    "dev:ui": "vite --config packages/ui/vite.config.js",
+    "desktop": "npm run build:ui && node scripts/desktop.js",
+    "desktop:dev": "node scripts/desktop.js",
+    "build:desktop": "npm run build:ui && electron-builder --config apps/desktop/electron-builder.yml",
+    "build:desktop:dir": "npm run build:ui && electron-builder --dir --config apps/desktop/electron-builder.yml"
   },
   "dependencies": {
     "@fontsource/plus-jakarta-sans": "^5.2.5",
@@ -18,6 +23,8 @@
     "mpegts.js": "^1.7.3"
   },
   "devDependencies": {
+    "electron": "^35.1.5",
+    "electron-builder": "^25.1.8",
     "vite": "^6.2.0"
   }
 }

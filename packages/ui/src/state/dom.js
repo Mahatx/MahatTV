@@ -152,6 +152,8 @@ export function queryDomElements() {
     cfgOpenGithubBtn: byId('cfgOpenGithubBtn'),
     cfgGithubStatusText: byId('cfgGithubStatusText'),
     cfgPlaylistSelect: byId('cfgPlaylistSelect'),
+    cfgDesktopTools: byId('cfgDesktopTools'),
+    cfgOpenPlaylistsFolderBtn: byId('cfgOpenPlaylistsFolderBtn'),
     tvOverlayBackdrop: byId('tvOverlayBackdrop'),
     tvOverlayHeader: byId('tvOverlayHeader'),
     tvOverlayNowPlaying: byId('tvOverlayNowPlaying'),

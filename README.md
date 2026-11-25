@@ -39,11 +39,22 @@ npm install
 npm run dev
 ```
 
-### Build de Produção + Iniciar
+### Build de Produção + Iniciar (Web)
 ```powershell
 npm run build
 npm start
 ```
+
+### 💻 Executar como Aplicativo Desktop (Electron)
+```powershell
+npm run desktop
+```
+
+### 📦 Gerar Instalador Windows (`.exe` + Portable)
+```powershell
+npm run build:desktop
+```
+*(Os executáveis são gerados em `release/` — para gerar apenas a pasta desempacotada rápida em `release/win-unpacked/MahatTV.exe`, use `npm run build:desktop:dir`.)*
 
 Após iniciar, acesse: 👉 **http://localhost:3000**
 
@@ -76,6 +87,15 @@ MahatTV/
 │           ├── services/apiClient.js  # Camada de abstração de API (pronta para Desktop/Mobile)
 │           ├── features/              # catalog, player, epg, tvMode, settings, scanner, githubSync
 │           └── styles/                # tokens, layout, panels, player, epg, settings, tv-mode, responsive
+├── apps/
+│   └── desktop/                       # Aplicativo Desktop Windows/Linux/macOS (Electron)
+│       ├── main.js                    # Processo principal + servidor embarcado + userData
+│       ├── preload.js                 # Ponte segura IPC (window.mahatDesktop)
+│       ├── electron-builder.yml       # Configuração do instalador Windows (.exe / Portable)
+│       └── build/                     # Ícones oficiais (icon.ico / icon.png)
+├── scripts/
+│   ├── dev.js                         # Dev integrado (Vite watch + Node server watch)
+│   └── desktop.js                     # Launcher Electron seguro para terminais de IDE
 └── storage/                           # Dados locais em runtime (ignorado no Git)
     ├── playlists/                     # Listas .m3u8 e Canais-Online.m3u8
     └── data/                          # verified-streams.json, epg-cache.json, favorites.json

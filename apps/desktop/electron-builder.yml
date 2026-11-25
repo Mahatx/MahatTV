@@ -1,0 +1,44 @@
+appId: com.mahatx.mahattv
+productName: MahatTV
+copyright: Copyright © 2026 Mahatx
+
+directories:
+  output: release
+  buildResources: apps/desktop/build
+
+files:
+  - package.json
+  - apps/desktop/main.js
+  - apps/desktop/preload.js
+  - apps/desktop/build/icon.ico
+  - apps/desktop/build/icon.png
+  - packages/core/**/*
+  - packages/server/**/*
+  - packages/ui/dist/**/*
+  - '!**/node_modules/**/*'
+
+asar: true
+
+win:
+  icon: apps/desktop/build/icon.ico
+  signAndEditExecutable: false
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: MahatTV
+  installerIcon: apps/desktop/build/icon.ico
+  uninstallerIcon: apps/desktop/build/icon.ico
+
+portable:
+  artifactName: MahatTV-${version}-Portable.exe

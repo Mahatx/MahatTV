@@ -181,6 +181,13 @@ export function createSettingsController({
         }
       });
     }
+
+    if (window.mahatDesktop && els.cfgDesktopTools && els.cfgOpenPlaylistsFolderBtn) {
+      els.cfgDesktopTools.classList.remove('hidden');
+      els.cfgOpenPlaylistsFolderBtn.addEventListener('click', () => {
+        window.mahatDesktop.openPlaylistsFolder();
+      });
+    }
   }
 
   return {
