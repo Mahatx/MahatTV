@@ -115,6 +115,9 @@ export function createPlayerController({
       mpegtsPlayer.destroy();
       mpegtsPlayer = null;
     }
+    els.videoPlayer.onplaying = null;
+    els.videoPlayer.oncanplay = null;
+    els.videoPlayer.onerror = null;
     els.videoPlayer.pause();
     els.videoPlayer.playbackRate = 1.0;
     els.videoPlayer.removeAttribute('src');
@@ -132,7 +135,12 @@ export function createPlayerController({
   }
 
   function playStream(item, options = {}) {
-    const { forceContinuousTs = false, tsAttempt = 0 } = options;
+    const {
+      forceContinuousTs = false,
+      forceNativeVideo = false,
+      nativeFallbackUrl = null,
+      tsAttempt = 0
+    } = options;
     state.currentStream = item;
     stopPlayer();
 
@@ -140,7 +148,9 @@ export function createPlayerController({
     els.playerErrorBox.classList.add('hidden');
     if (els.tvErrorToast) els.tvErrorToast.classList.add('hidden');
     els.playerOverlay.classList.remove('hidden');
-    els.playerStatusText.textContent = `Sincronizando ${item.name} ao vivo...`;
+    els.playerStatusText.textContent = forceNativeVideo
+      ? `Abrindo ${item.name} no decodificador nativo...`
+      : `Sincronizando ${item.name} ao vivo...`;
 
     els.nowPlayingTitle.textContent = item.name;
     if (els.ctrlChannelMiniTitle) els.ctrlChannelMiniTitle.textContent = item.name;
@@ -155,7 +165,9 @@ export function createPlayerController({
     const hasNativeProxy = Boolean(platformBridge.getLocalStreamProxyBaseUrl());
     const useProxy = els.useProxyToggle.checked && (!platformBridge.isStandaloneMobile() || hasNativeProxy);
     const useSmartAntiFreeze = els.smartHlsToggle.checked && !forceContinuousTs;
-    const isMobile = platformBridge.isMobileNative() || window.innerWidth <= 960;
+    const isNativeMobile = platformBridge.isMobileNative();
+    const isMobile = isNativeMobile || window.innerWidth <= 960;
+    const canNativeHls = Boolean(els.videoPlayer.canPlayType('application/vnd.apple.mpegurl'));
 
     let markedOnline = false;
     const hideOverlayAndMarkOnline = () => {
@@ -193,23 +205,56 @@ export function createPlayerController({
 
     const convertedHlsUrl = item.type === 'ts' && useSmartAntiFreeze ? tryConvertXtreamToHls(item.url) : null;
 
+    // Caminho Nativo HTML5/Hardware (Android MediaPlayer/ExoPlayer — decodifica H.265/HEVC e MP2/AC-3)
+    if (forceNativeVideo) {
+      els.nowPlayingBadge.textContent = 'AO VIVO • NATIVO HW';
+      const targetUrl = nativeFallbackUrl || (useProxy ? apiClient.buildProxyUrl(item.url, { continuous: item.type === 'ts' }) : item.url);
+      startupTimeoutTimer = setTimeout(() => {
+        if (state.currentStream && state.currentStream.url === item.url && !markedOnline) {
+          showError('Canal indisponível ou codec incompatível com este aparelho. Tente o próximo canal.');
+        }
+      }, 13000);
+
+      els.videoPlayer.onerror = () => {
+        if (state.currentStream && state.currentStream.url === item.url && !markedOnline) {
+          showError('Este canal está offline ou usa codec incompatível no player embutido. Tente o próximo canal ou "Abrir Direto".');
+        }
+      };
+      els.videoPlayer.src = targetUrl;
+      els.videoPlayer.play().catch(() => {});
+      return;
+    }
+
     // Timeout de segurança para não ficar girando infinitamente se o servidor travar
     startupTimeoutTimer = setTimeout(() => {
       if (state.currentStream && state.currentStream.url === item.url && !markedOnline) {
         if (convertedHlsUrl) {
           playStream(item, { forceContinuousTs: true, tsAttempt: 0 });
+        } else if (isNativeMobile && !forceNativeVideo) {
+          const fallbackUrl = useProxy ? apiClient.buildProxyUrl(item.url, { continuous: item.type === 'ts' }) : item.url;
+          playStream(item, { forceNativeVideo: true, nativeFallbackUrl: fallbackUrl });
         } else {
           showError('Tempo esgotado ao conectar ao canal. Tente novamente ou pule para o próximo canal.');
         }
       }
-    }, isMobile ? 14000 : 18000);
+    }, isMobile ? 12000 : 18000);
 
     if (item.type === 'm3u8' || convertedHlsUrl) {
       const targetHlsUrl = convertedHlsUrl || item.url;
       const proxiedHlsUrl = useProxy ? apiClient.buildProxyUrl(targetHlsUrl) : targetHlsUrl;
       els.nowPlayingBadge.textContent = convertedHlsUrl ? 'AO VIVO • HLS TEMPO REAL' : 'AO VIVO • HLS';
 
+      // No Android nativo, canais H.265/HEVC funcionam melhor direto no decodificador nativo de hardware
+      const isHevcNamed = /\b(h\.?265|hevc)\b/i.test(item.name || '');
+      if (isNativeMobile && isHevcNamed && canNativeHls) {
+        playStream(item, { forceNativeVideo: true, nativeFallbackUrl: proxiedHlsUrl });
+        return;
+      }
+
       if (Hls && Hls.isSupported()) {
+        let mediaRecoverAttempts = 0;
+        let fallbackTriggered = false;
+
         hlsPlayer = new Hls({
           enableWorker: true,
           lowLatencyMode: false,
@@ -219,12 +264,12 @@ export function createPlayerController({
           liveSyncDurationCount: isMobile ? 2 : 2.5,
           liveMaxLatencyDurationCount: isMobile ? 5 : 6,
           maxLiveSyncPlaybackRate: 1.04,
-          manifestLoadingTimeOut: isMobile ? 8000 : 12000,
-          levelLoadingTimeOut: isMobile ? 8000 : 12000,
-          fragLoadingTimeOut: isMobile ? 10000 : 15000,
-          manifestLoadingMaxRetry: isMobile ? 2 : 6,
-          levelLoadingMaxRetry: isMobile ? 2 : 6,
-          fragLoadingMaxRetry: isMobile ? 3 : 6
+          manifestLoadingTimeOut: isMobile ? 7000 : 12000,
+          levelLoadingTimeOut: isMobile ? 7000 : 12000,
+          fragLoadingTimeOut: isMobile ? 9000 : 15000,
+          manifestLoadingMaxRetry: isMobile ? 1 : 4,
+          levelLoadingMaxRetry: isMobile ? 1 : 4,
+          fragLoadingMaxRetry: isMobile ? 2 : 5
         });
 
         hlsPlayer.loadSource(proxiedHlsUrl);
@@ -235,21 +280,61 @@ export function createPlayerController({
         });
 
         hlsPlayer.on(Hls.Events.ERROR, (_, data) => {
+          if (fallbackTriggered) return;
+
+          // Failover IMEDIATO (<0.3s) quando servidor Xtream retorna 403/404/502/503 no manifesto .m3u8
+          const httpCode = data?.response?.code || 0;
+          if (
+            convertedHlsUrl &&
+            (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR ||
+              data.details === Hls.ErrorDetails.LEVEL_LOAD_ERROR) &&
+            httpCode >= 400
+          ) {
+            fallbackTriggered = true;
+            playStream(item, { forceContinuousTs: true, tsAttempt: 0 });
+            return;
+          }
+
+          // Erro de codec no MSE (ex.: H.265/HEVC disfarçado em canal FHD): tenta decodificador nativo no Android
+          if (
+            isNativeMobile &&
+            canNativeHls &&
+            (data.details === Hls.ErrorDetails.BUFFER_ADD_CODEC_ERROR ||
+              data.details === Hls.ErrorDetails.FRAG_PARSING_ERROR)
+          ) {
+            fallbackTriggered = true;
+            playStream(item, { forceNativeVideo: true, nativeFallbackUrl: proxiedHlsUrl });
+            return;
+          }
+
           if (data.fatal) {
             if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
-              hlsPlayer.recoverMediaError();
-              return;
+              if (mediaRecoverAttempts < 1) {
+                mediaRecoverAttempts++;
+                hlsPlayer.recoverMediaError();
+                return;
+              }
+              if (isNativeMobile && canNativeHls) {
+                fallbackTriggered = true;
+                playStream(item, { forceNativeVideo: true, nativeFallbackUrl: proxiedHlsUrl });
+                return;
+              }
             }
             if (convertedHlsUrl) {
+              fallbackTriggered = true;
               playStream(item, { forceContinuousTs: true, tsAttempt: 0 });
+              return;
+            }
+            if (isNativeMobile && canNativeHls) {
+              fallbackTriggered = true;
+              playStream(item, { forceNativeVideo: true, nativeFallbackUrl: proxiedHlsUrl });
               return;
             }
             showError(`Erro HLS (${data.details || 'Stream indisponível ou offline'}).`);
           }
         });
-      } else if (els.videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
-        els.videoPlayer.src = proxiedHlsUrl;
-        els.videoPlayer.play().catch((err) => showError(err.message));
+      } else if (canNativeHls) {
+        playStream(item, { forceNativeVideo: true, nativeFallbackUrl: proxiedHlsUrl });
       }
       return;
     }
@@ -257,13 +342,15 @@ export function createPlayerController({
     if (item.type === 'ts') {
       els.nowPlayingBadge.textContent = 'AO VIVO • TS CONTÍNUO';
       const tsUrl = useProxy ? apiClient.buildProxyUrl(item.url, { continuous: true }) : item.url;
+      const fullTsUrl = new URL(tsUrl, window.location.origin).toString();
 
       if (mpegts && mpegts.getFeatureList().mseLivePlayback) {
+        let handledError = false;
         mpegtsPlayer = mpegts.createPlayer(
           {
             type: 'mpegts',
             isLive: true,
-            url: new URL(tsUrl, window.location.origin).toString()
+            url: fullTsUrl
           },
           {
             enableWorker: true,
@@ -280,24 +367,44 @@ export function createPlayerController({
         mpegtsPlayer.load();
         mpegtsPlayer.play().catch(() => {});
 
-        mpegtsPlayer.on(mpegts.Events.ERROR, (errorType, errorDetail) => {
-          if (state.currentStream && state.currentStream.url === item.url) {
-            if (tsAttempt < 2) {
-              els.playerStatusText.textContent = `Ressincronizando transmissão (${tsAttempt + 1}/2)...`;
-              els.playerOverlay.classList.remove('hidden');
-              clearTimeout(autoReconnectTimer);
-              autoReconnectTimer = setTimeout(() => {
-                if (state.currentStream && state.currentStream.url === item.url) {
-                  playStream(item, { forceContinuousTs: true, tsAttempt: tsAttempt + 1 });
-                }
-              }, 900);
+        mpegtsPlayer.on(mpegts.Events.ERROR, (errorType, errorDetail, errorInfo) => {
+          if (handledError) return;
+          if (!state.currentStream || state.currentStream.url !== item.url) return;
+          handledError = true;
+
+          // Erro de codec/MSE (ex.: áudio MP2 no Eurosport ou vídeo HEVC): nunca entra em loop; tenta player nativo HW
+          if (errorType === mpegts.ErrorTypes.MEDIA_ERROR) {
+            if (isNativeMobile) {
+              playStream(item, { forceNativeVideo: true, nativeFallbackUrl: fullTsUrl });
             } else {
-              showError(`Canal indisponível ou offline (${errorDetail || errorType}).`);
+              showError(`Codec não suportado pelo navegador (${errorDetail}). Use "Abrir Direto" (VLC/MX Player) ou pule para o próximo canal.`);
             }
+            return;
+          }
+
+          // Erro HTTP definitivo (403/404/410/502): não fica tentando reconectar infinitamente
+          const httpCode = errorInfo?.code || 0;
+          if (httpCode >= 400 && httpCode < 600) {
+            showError(`Servidor do canal recusou a conexão (HTTP ${httpCode}). Tente o próximo canal.`);
+            return;
+          }
+
+          // Erro de rede transitório: apenas 1 tentativa rápida antes de exibir erro limpo
+          if (tsAttempt < 1) {
+            els.playerStatusText.textContent = 'Reconectando transmissão ao vivo...';
+            els.playerOverlay.classList.remove('hidden');
+            clearTimeout(autoReconnectTimer);
+            autoReconnectTimer = setTimeout(() => {
+              if (state.currentStream && state.currentStream.url === item.url) {
+                playStream(item, { forceContinuousTs: true, tsAttempt: tsAttempt + 1 });
+              }
+            }, 800);
           } else {
-            showError(`Falha no stream MPEG-TS (${errorType}: ${errorDetail}).`);
+            showError(`Conexão instável ou canal offline (${errorDetail || errorType}).`);
           }
         });
+      } else if (isNativeMobile) {
+        playStream(item, { forceNativeVideo: true, nativeFallbackUrl: fullTsUrl });
       } else {
         showError('Seu navegador não suporta Media Source Extensions para MPEG-TS.');
       }
