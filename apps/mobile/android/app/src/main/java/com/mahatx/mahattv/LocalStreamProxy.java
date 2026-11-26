@@ -25,6 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Proxy HTTP local embarcado em 127.0.0.1 para reprodução nativa de IPTV no Android WebView.
@@ -169,9 +170,10 @@ public class LocalStreamProxy {
 
             boolean isContinuous = "1".equals(params.get("continuous"));
             boolean isSegment = "1".equals(params.get("segment"));
+            boolean gunzip = "1".equals(params.get("gunzip"));
             String rangeHeader = headers.get("range");
 
-            proxyStream(targetUrl, method, isContinuous, isSegment, rangeHeader, rawOut);
+            proxyStream(targetUrl, method, isContinuous, isSegment, gunzip, rangeHeader, rawOut);
         } catch (IOException ignored) {
             // Cliente fechou a conexão (ex: usuário trocou de canal)
         } catch (Exception e) {
@@ -184,6 +186,7 @@ public class LocalStreamProxy {
         String method,
         boolean isContinuous,
         boolean isSegment,
+        boolean gunzip,
         String rangeHeader,
         OutputStream clientOut
     ) throws IOException {
@@ -234,6 +237,8 @@ public class LocalStreamProxy {
 
                     if (isContinuous) {
                         sb.append("Content-Type: video/mp2t\r\n");
+                    } else if (gunzip) {
+                        sb.append("Content-Type: application/xml; charset=utf-8\r\n");
                     } else {
                         String respCt = contentType;
                         if (respCt.isEmpty()) {
@@ -264,7 +269,9 @@ public class LocalStreamProxy {
                 }
 
                 long bytesCopied = 0;
-                try (InputStream in = new BufferedInputStream(conn.getInputStream(), 32768)) {
+                InputStream upstreamRaw = conn.getInputStream();
+                InputStream decodedStream = gunzip ? new GZIPInputStream(upstreamRaw, 32768) : upstreamRaw;
+                try (InputStream in = new BufferedInputStream(decodedStream, 32768)) {
                     byte[] buf = new byte[16384];
                     int read;
                     while (running && (read = in.read(buf)) != -1) {

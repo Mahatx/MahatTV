@@ -120,5 +120,35 @@ export const mobilePlaylistStore = {
       }
       return meta;
     }
+  },
+
+  async getBlobText(key) {
+    try {
+      const db = await openDb();
+      const rec = await new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_CONTENTS, 'readonly');
+        const req = tx.objectStore(STORE_CONTENTS).get(key);
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => reject(req.error);
+      });
+      return rec && typeof rec.text === 'string' ? rec.text : '';
+    } catch {
+      return '';
+    }
+  },
+
+  async setBlobText(key, text) {
+    try {
+      const db = await openDb();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_CONTENTS, 'readwrite');
+        tx.objectStore(STORE_CONTENTS).put({ name: key, text: String(text || '') });
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+      return true;
+    } catch {
+      return false;
+    }
   }
 };

@@ -83,11 +83,11 @@ export const apiClient = {
 
   postEpgGuide: (payload) =>
     platformBridge.isStandaloneMobile()
-      ? mobileLocalEngine.getEpgGuide(payload)
+      ? mobileLocalEngine.postEpgGuide(payload)
       : postJson('/api/epg/guide', payload),
 
   refreshEpg: () =>
-    platformBridge.isStandaloneMobile() ? Promise.resolve({ loaded: false }) : postJson('/api/epg/refresh'),
+    platformBridge.isStandaloneMobile() ? mobileLocalEngine.refreshEpg() : postJson('/api/epg/refresh'),
 
   getChannelEpg: (name, tvgId) =>
     platformBridge.isStandaloneMobile()

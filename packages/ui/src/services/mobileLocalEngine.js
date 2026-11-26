@@ -1,6 +1,7 @@
 import { CapacitorHttp } from '@capacitor/core';
 import { sortClientItems, tryConvertXtreamToHls } from '../utils/format.js';
 import { mobilePlaylistStore } from './mobilePlaylistStore.js';
+import { mobileEpgService } from './mobileEpgService.js';
 
 /**
  * Motor Mobile Autônomo (Standalone) para rodar 100% no celular (Android/iOS Capacitor)
@@ -680,6 +681,8 @@ export const mobileLocalEngine = {
 
   async getPlaylists() {
     await ensureSeedLoaded();
+    // Aquece o cache/download do EPG brasileiro em segundo plano sem travar a abertura
+    mobileEpgService.ensureLoaded({ waitIfEmpty: false }).catch(() => {});
     const localMeta = await mobilePlaylistStore.listMeta();
     const merged = new Map();
 
@@ -770,6 +773,22 @@ export const mobileLocalEngine = {
     const total = list.length;
     const totalPages = Math.max(1, Math.ceil(total / limit));
     const start = (page - 1) * limit;
+    const nowMs = Date.now();
+    const pageItems = list.slice(start, start + limit).map((it) => {
+      const snap = mobileEpgService.getChannelProgramSnapshot(it, nowMs);
+      if (snap && snap.current) {
+        return {
+          ...it,
+          epgNow: {
+            title: snap.current.title,
+            start: snap.current.start,
+            stop: snap.current.stop,
+            progress: snap.current.progress
+          }
+        };
+      }
+      return it;
+    });
 
     return {
       playlist: params.playlist,
@@ -777,7 +796,7 @@ export const mobileLocalEngine = {
       limit,
       total,
       totalPages,
-      items: list.slice(start, start + limit),
+      items: pageItems,
       scanner: getScannerSummary()
     };
   },
@@ -968,38 +987,86 @@ export const mobileLocalEngine = {
     };
   },
 
-  async getEpgGuide(params) {
-    const itemsRes = await this.getItems({ ...params, page: 1, limit: 120 });
-    const now = Date.now();
-    const base = Math.floor(now / (30 * 60 * 1000)) * (30 * 60 * 1000);
-    const hours = parseInt(params.hours || '6', 10);
-    const offsetMinutes = parseInt(params.offsetMinutes || '-30', 10);
-    const windowStart = base + offsetMinutes * 60 * 1000;
-    const windowEnd = windowStart + hours * 60 * 60 * 1000;
-    return {
-      now,
-      windowStart,
-      windowEnd,
-      hours,
-      offsetMinutes,
-      totalInCategory: itemsRes.total,
-      totalUniqueChannels: itemsRes.items.length,
-      totalDisplayed: itemsRes.items.length,
-      matchedCount: 0,
-      epgStatus: { loading: false, loaded: false, lastUpdatedAt: null },
-      rows: itemsRes.items.map((ch) => ({
-        channel: ch,
-        variantsCount: 1,
-        epgMatched: false,
-        currentProgram: null,
-        nextProgram: null,
-        programs: []
-      }))
-    };
+  async getEpgGuide(params = {}) {
+    await ensureSeedLoaded();
+    await mobileEpgService.ensureLoaded({ waitIfEmpty: true });
+
+    const data = await ensurePlaylistLoaded(params.playlist || '__ONLINE__');
+    let list = data.items.filter((it) => it.isLive);
+
+    if (params.category && params.category !== 'ALL') {
+      list = list.filter((it) => it.group === params.category);
+    }
+
+    const typeFilter = params.type || 'ALL';
+    if (typeFilter === 'ONLINE') {
+      list = list.filter((it) => {
+        const v = verifiedMap.get(it.url);
+        return (v ? v.status : it.status) === 'online';
+      });
+    } else if (typeFilter === 'OFFLINE') {
+      list = list.filter((it) => {
+        const v = verifiedMap.get(it.url);
+        return (v ? v.status : it.status) === 'offline';
+      });
+    } else if (typeFilter !== 'ALL' && typeFilter !== 'LIVE') {
+      list = list.filter((it) => it.type === typeFilter);
+    }
+
+    if (params.search) {
+      const q = params.search.toLowerCase();
+      list = list.filter((it) => it.name.toLowerCase().includes(q) || it.group.toLowerCase().includes(q));
+    }
+
+    const favUrls = new Set();
+    try {
+      const storedFavs = JSON.parse(localStorage.getItem('iptv_favorites_v1') || '[]');
+      if (Array.isArray(storedFavs)) storedFavs.forEach((f) => f && f.url && favUrls.add(f.url));
+    } catch {
+      // Ignorar
+    }
+
+    return mobileEpgService.buildGuideForItems(
+      list,
+      {
+        hours: Math.min(24, Math.max(2, parseInt(params.hours || '6', 10))),
+        offsetMinutes: parseInt(params.offsetMinutes || '-30', 10),
+        dedupe: params.dedupe !== '0' && params.dedupe !== false,
+        onlyWithEpg: params.onlyWithEpg === '1' || params.onlyWithEpg === true,
+        sortBy: params.sort || params.sortBy || 'default',
+        limit: Math.min(200, Math.max(10, parseInt(params.limit || '150', 10)))
+      },
+      { verifiedMap, favoriteUrlsSet: favUrls }
+    );
   },
 
-  async getChannelEpg() {
-    return { matched: false, current: null, upcoming: [] };
+  async postEpgGuide(payload = {}) {
+    await ensureSeedLoaded();
+    await mobileEpgService.ensureLoaded({ waitIfEmpty: true });
+
+    const rawItems = Array.isArray(payload.items) ? payload.items : [];
+    const favUrls = new Set(rawItems.map((it) => it && it.url).filter(Boolean));
+
+    return mobileEpgService.buildGuideForItems(
+      rawItems,
+      {
+        hours: Math.min(24, Math.max(2, parseInt(payload.hours || '6', 10))),
+        offsetMinutes: parseInt(payload.offsetMinutes || '-30', 10),
+        dedupe: payload.dedupe !== false && payload.dedupe !== '0',
+        onlyWithEpg: Boolean(payload.onlyWithEpg),
+        sortBy: payload.sortBy || payload.sort || 'default',
+        limit: Math.min(200, Math.max(10, parseInt(payload.limit || '150', 10)))
+      },
+      { verifiedMap, favoriteUrlsSet: favUrls }
+    );
+  },
+
+  async refreshEpg() {
+    return mobileEpgService.refreshEpgData(true);
+  },
+
+  async getChannelEpg(name, tvgId) {
+    return mobileEpgService.getChannelSchedule(name, tvgId);
   },
 
   async getGithubStatus(force = false) {
