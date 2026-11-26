@@ -6,7 +6,7 @@ export const state = {
   searchQuery: '',
   typeFilter: 'ALL',
   page: 1,
-  limit: 60,
+  limit: typeof window !== 'undefined' && window.innerWidth <= 960 ? 30 : 60,
   totalPages: 1,
   totalItems: 0,
   items: [],

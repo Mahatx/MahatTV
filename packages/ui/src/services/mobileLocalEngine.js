@@ -9,7 +9,8 @@ import { sortClientItems, tryConvertXtreamToHls } from '../utils/format.js';
 const REMOTE_BASE = 'https://raw.githubusercontent.com/Ramys/Iptv-Brasil-2026/master';
 const MOBILE_PLAYLISTS = [
   { name: 'CanaisBR03.m3u8', sizeMB: '0.01' },
-  { name: 'Canais.m3u8', sizeMB: '0.15' }
+  { name: 'Canais.m3u8', sizeMB: '0.15' },
+  { name: 'CanaisBR02.m3u8', sizeMB: '0.28' }
 ];
 const VERIFIED_STORAGE_KEY = 'mahattv_mobile_verified_v1';
 
@@ -248,8 +249,8 @@ async function ensurePlaylistLoaded(fileName) {
     const items = [];
     const categories = new Map();
     const seen = new Set();
-    for (const pl of MOBILE_PLAYLISTS) {
-      const data = await ensurePlaylistLoaded(pl.name);
+    const loadedLists = await Promise.all(MOBILE_PLAYLISTS.map((pl) => ensurePlaylistLoaded(pl.name)));
+    for (const data of loadedLists) {
       for (const it of data.items) {
         if (!it.isLive || seen.has(it.url)) continue;
         seen.add(it.url);
@@ -263,9 +264,30 @@ async function ensurePlaylistLoaded(fileName) {
   if (cache.has(fileName)) return cache.get(fileName);
 
   const storageKey = `mahattv_mobile_pl_${fileName}`;
+  const cachedText = localStorage.getItem(storageKey) || '';
+
+  // Stale-while-revalidate: se já houver cache local, entrega instantaneamente e atualiza em segundo plano
+  if (cachedText) {
+    const parsedCached = parseM3u8Text(cachedText, fileName);
+    cache.set(fileName, parsedCached);
+    nativeTextGet(`${REMOTE_BASE}/${encodeURIComponent(fileName)}`, 12000)
+      .then((freshText) => {
+        if (freshText && freshText !== cachedText) {
+          cache.set(fileName, parseM3u8Text(freshText, fileName));
+          try {
+            localStorage.setItem(storageKey, freshText);
+          } catch {
+            // Quota excedida
+          }
+        }
+      })
+      .catch(() => {});
+    return parsedCached;
+  }
+
   let text = '';
   try {
-    text = await nativeTextGet(`${REMOTE_BASE}/${encodeURIComponent(fileName)}`, 15000);
+    text = await nativeTextGet(`${REMOTE_BASE}/${encodeURIComponent(fileName)}`, 12000);
     if (text) {
       try {
         localStorage.setItem(storageKey, text);
@@ -274,7 +296,7 @@ async function ensurePlaylistLoaded(fileName) {
       }
     }
   } catch {
-    text = localStorage.getItem(storageKey) || '';
+    text = '';
   }
 
   const parsed = parseM3u8Text(text, fileName);

@@ -152,8 +152,11 @@ export function createCatalogController({
       return;
     }
 
+    const frag = document.createDocumentFragment();
+    const favUrls = new Set(state.favorites.map((f) => f.url));
+
     items.forEach((item) => {
-      const isFav = state.favorites.some((f) => f.url === item.url);
+      const isFav = favUrls.has(item.url);
       const isPlaying = state.currentStream && state.currentStream.url === item.url;
       const statusClass =
         item.status === 'online' ? 'status-online' : item.status === 'offline' ? 'status-offline' : '';
@@ -178,7 +181,7 @@ export function createCatalogController({
           <div class="card-logo-circle">
             ${
               item.logo
-                ? `<img src="${escapeAttr(item.logo)}" alt="${escapeAttr(item.name)}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                ? `<img src="${escapeAttr(item.logo)}" alt="${escapeAttr(item.name)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
                    <div class="card-thumb-fallback" style="display:none;">📺</div>`
                 : `<div class="card-thumb-fallback">📺</div>`
             }
@@ -226,8 +229,10 @@ export function createCatalogController({
         onPlayChannel(item);
       });
 
-      els.itemsGrid.appendChild(card);
+      frag.appendChild(card);
     });
+
+    els.itemsGrid.appendChild(frag);
   }
 
   function renderFavorites() {
@@ -303,6 +308,7 @@ export function createCatalogController({
       filtered.sort((a, b) => b.count - a.count);
     }
 
+    const catFrag = document.createDocumentFragment();
     filtered.forEach((cat) => {
       const li = document.createElement('li');
       li.className = `category-item ${state.currentCategory === cat.name ? 'active' : ''}`;
@@ -318,8 +324,9 @@ export function createCatalogController({
         fetchItems();
         toggleMobileSidebar(false);
       });
-      els.categoryList.appendChild(li);
+      catFrag.appendChild(li);
     });
+    els.categoryList.appendChild(catFrag);
   }
 
   async function selectPlaylist(playlistName) {
@@ -383,6 +390,7 @@ export function createCatalogController({
         els.cfgPlaylistSelect.appendChild(opt2);
       }
     });
+    return data;
   }
 
   function bindEvents() {

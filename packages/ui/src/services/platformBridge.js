@@ -37,6 +37,19 @@ export const platformBridge = {
     return this.isMobileNative() && !this.getApiBaseUrl();
   },
 
+  getLocalStreamProxyBaseUrl() {
+    if (typeof window === 'undefined' || !this.isMobileNative()) return '';
+    try {
+      if (window.MahatNative && typeof window.MahatNative.getProxyPort === 'function') {
+        const port = Number(window.MahatNative.getProxyPort() || 0);
+        if (port > 0) return `http://127.0.0.1:${port}`;
+      }
+    } catch {
+      // Bridge nativa indisponível
+    }
+    return 'http://127.0.0.1:18765';
+  },
+
   getApiBaseUrl() {
     if (typeof window === 'undefined') return '';
     if (window.mahatDesktop && window.mahatDesktop.apiBaseUrl) {

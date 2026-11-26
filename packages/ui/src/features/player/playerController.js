@@ -15,6 +15,7 @@ export function createPlayerController({
   let hlsPlayer = null;
   let mpegtsPlayer = null;
   let autoReconnectTimer = null;
+  let startupTimeoutTimer = null;
   let liveEdgeWatchdogTimer = null;
   let controlsIdleTimer = null;
 
@@ -95,6 +96,10 @@ export function createPlayerController({
       clearTimeout(autoReconnectTimer);
       autoReconnectTimer = null;
     }
+    if (startupTimeoutTimer) {
+      clearTimeout(startupTimeoutTimer);
+      startupTimeoutTimer = null;
+    }
     if (liveEdgeWatchdogTimer) {
       clearInterval(liveEdgeWatchdogTimer);
       liveEdgeWatchdogTimer = null;
@@ -127,7 +132,7 @@ export function createPlayerController({
   }
 
   function playStream(item, options = {}) {
-    const { forceContinuousTs = false } = options;
+    const { forceContinuousTs = false, tsAttempt = 0 } = options;
     state.currentStream = item;
     stopPlayer();
 
@@ -147,18 +152,32 @@ export function createPlayerController({
     onChannelStarted(item);
     onLoadChannelEpg(item);
 
-    const useProxy = els.useProxyToggle.checked && !platformBridge.isStandaloneMobile();
+    const hasNativeProxy = Boolean(platformBridge.getLocalStreamProxyBaseUrl());
+    const useProxy = els.useProxyToggle.checked && (!platformBridge.isStandaloneMobile() || hasNativeProxy);
     const useSmartAntiFreeze = els.smartHlsToggle.checked && !forceContinuousTs;
+    const isMobile = platformBridge.isMobileNative() || window.innerWidth <= 960;
 
+    let markedOnline = false;
     const hideOverlayAndMarkOnline = () => {
+      if (startupTimeoutTimer) {
+        clearTimeout(startupTimeoutTimer);
+        startupTimeoutTimer = null;
+      }
       els.playerOverlay.classList.add('hidden');
       els.playerErrorBox.classList.add('hidden');
       if (els.tvErrorToast) els.tvErrorToast.classList.add('hidden');
       updateLiveBadgeUI(true, 'AO VIVO');
-      reportStreamStatusFromPlayer(item, 'online');
+      if (!markedOnline) {
+        markedOnline = true;
+        reportStreamStatusFromPlayer(item, 'online');
+      }
     };
 
     const showError = (msg) => {
+      if (startupTimeoutTimer) {
+        clearTimeout(startupTimeoutTimer);
+        startupTimeoutTimer = null;
+      }
       els.playerOverlay.classList.add('hidden');
       els.playerErrorBox.classList.remove('hidden');
       els.playerErrorBox.innerHTML = `<strong>Aviso de Reprodução:</strong><br/>${escapeHtml(msg)}`;
@@ -174,6 +193,17 @@ export function createPlayerController({
 
     const convertedHlsUrl = item.type === 'ts' && useSmartAntiFreeze ? tryConvertXtreamToHls(item.url) : null;
 
+    // Timeout de segurança para não ficar girando infinitamente se o servidor travar
+    startupTimeoutTimer = setTimeout(() => {
+      if (state.currentStream && state.currentStream.url === item.url && !markedOnline) {
+        if (convertedHlsUrl) {
+          playStream(item, { forceContinuousTs: true, tsAttempt: 0 });
+        } else {
+          showError('Tempo esgotado ao conectar ao canal. Tente novamente ou pule para o próximo canal.');
+        }
+      }
+    }, isMobile ? 14000 : 18000);
+
     if (item.type === 'm3u8' || convertedHlsUrl) {
       const targetHlsUrl = convertedHlsUrl || item.url;
       const proxiedHlsUrl = useProxy ? apiClient.buildProxyUrl(targetHlsUrl) : targetHlsUrl;
@@ -183,15 +213,18 @@ export function createPlayerController({
         hlsPlayer = new Hls({
           enableWorker: true,
           lowLatencyMode: false,
-          backBufferLength: 30,
-          maxBufferLength: 45,
-          maxMaxBufferLength: 90,
-          liveSyncDurationCount: 2.5,
-          liveMaxLatencyDurationCount: 6,
+          backBufferLength: isMobile ? 10 : 30,
+          maxBufferLength: isMobile ? 18 : 45,
+          maxMaxBufferLength: isMobile ? 36 : 90,
+          liveSyncDurationCount: isMobile ? 2 : 2.5,
+          liveMaxLatencyDurationCount: isMobile ? 5 : 6,
           maxLiveSyncPlaybackRate: 1.04,
-          manifestLoadingMaxRetry: 8,
-          levelLoadingMaxRetry: 8,
-          fragLoadingMaxRetry: 8
+          manifestLoadingTimeOut: isMobile ? 8000 : 12000,
+          levelLoadingTimeOut: isMobile ? 8000 : 12000,
+          fragLoadingTimeOut: isMobile ? 10000 : 15000,
+          manifestLoadingMaxRetry: isMobile ? 2 : 6,
+          levelLoadingMaxRetry: isMobile ? 2 : 6,
+          fragLoadingMaxRetry: isMobile ? 3 : 6
         });
 
         hlsPlayer.loadSource(proxiedHlsUrl);
@@ -208,7 +241,7 @@ export function createPlayerController({
               return;
             }
             if (convertedHlsUrl) {
-              playStream(item, { forceContinuousTs: true });
+              playStream(item, { forceContinuousTs: true, tsAttempt: 0 });
               return;
             }
             showError(`Erro HLS (${data.details || 'Stream indisponível ou offline'}).`);
@@ -235,11 +268,11 @@ export function createPlayerController({
           {
             enableWorker: true,
             enableStashBuffer: true,
-            stashInitialSize: 384 * 1024,
+            stashInitialSize: isMobile ? 128 * 1024 : 384 * 1024,
             liveBufferLatencyChasing: false,
             autoCleanupSourceBuffer: true,
-            autoCleanupMaxBackwardDuration: 60,
-            autoCleanupMinBackwardDuration: 30
+            autoCleanupMaxBackwardDuration: isMobile ? 20 : 60,
+            autoCleanupMinBackwardDuration: isMobile ? 10 : 30
           }
         );
 
@@ -249,14 +282,18 @@ export function createPlayerController({
 
         mpegtsPlayer.on(mpegts.Events.ERROR, (errorType, errorDetail) => {
           if (state.currentStream && state.currentStream.url === item.url) {
-            els.playerStatusText.textContent = 'Ressincronizando transmissão ao vivo...';
-            els.playerOverlay.classList.remove('hidden');
-            clearTimeout(autoReconnectTimer);
-            autoReconnectTimer = setTimeout(() => {
-              if (state.currentStream && state.currentStream.url === item.url) {
-                playStream(item, { forceContinuousTs: true });
-              }
-            }, 900);
+            if (tsAttempt < 2) {
+              els.playerStatusText.textContent = `Ressincronizando transmissão (${tsAttempt + 1}/2)...`;
+              els.playerOverlay.classList.remove('hidden');
+              clearTimeout(autoReconnectTimer);
+              autoReconnectTimer = setTimeout(() => {
+                if (state.currentStream && state.currentStream.url === item.url) {
+                  playStream(item, { forceContinuousTs: true, tsAttempt: tsAttempt + 1 });
+                }
+              }, 900);
+            } else {
+              showError(`Canal indisponível ou offline (${errorDetail || errorType}).`);
+            }
           } else {
             showError(`Falha no stream MPEG-TS (${errorType}: ${errorDetail}).`);
           }

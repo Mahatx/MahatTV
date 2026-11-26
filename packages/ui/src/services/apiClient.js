@@ -94,6 +94,10 @@ export const apiClient = {
 
   buildProxyUrl: (url, { continuous = false } = {}) => {
     if (platformBridge.isStandaloneMobile()) {
+      const nativeProxy = platformBridge.getLocalStreamProxyBaseUrl();
+      if (nativeProxy) {
+        return `${nativeProxy}/proxy?url=${encodeURIComponent(url)}${continuous ? '&continuous=1' : ''}`;
+      }
       return url;
     }
     const base = platformBridge.getApiBaseUrl();

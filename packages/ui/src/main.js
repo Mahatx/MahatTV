@@ -138,7 +138,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Carga inicial (hidrata favoritos salvos no projeto antes de listar)
   await catalog.hydrateFavorites();
-  await catalog.fetchPlaylists();
+  const playlistsData = await catalog.fetchPlaylists();
+  // No APK autônomo, abre direto nos canais verificados Online (carregamento instantâneo)
+  if (
+    platformBridge.isStandaloneMobile() &&
+    state.currentPlaylist === '__LIVE_BR__' &&
+    playlistsData?.scanner?.savedOnlineTotal > 0
+  ) {
+    state.currentPlaylist = '__ONLINE__';
+  }
   await catalog.selectPlaylist(state.currentPlaylist);
   scanner.pollScannerStatus();
   githubSync.checkGithubStatus(false);

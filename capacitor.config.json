@@ -20,7 +20,7 @@
   },
   "plugins": {
     "CapacitorHttp": {
-      "enabled": true
+      "enabled": false
     },
     "StatusBar": {
       "style": "DARK",
