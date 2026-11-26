@@ -68,11 +68,13 @@ export const apiClient = {
 
   getGithubStatus: (force = false) =>
     platformBridge.isStandaloneMobile()
-      ? mobileLocalEngine.getGithubStatus()
+      ? mobileLocalEngine.getGithubStatus(force)
       : requestJson(`/api/github/status${force ? '?force=1' : ''}`),
 
   triggerGithubUpdate: (options) =>
-    platformBridge.isStandaloneMobile() ? mobileLocalEngine.getGithubStatus() : postJson('/api/github/update', options),
+    platformBridge.isStandaloneMobile()
+      ? mobileLocalEngine.triggerGithubUpdate(options)
+      : postJson('/api/github/update', options),
 
   getEpgGuide: (params) =>
     platformBridge.isStandaloneMobile()

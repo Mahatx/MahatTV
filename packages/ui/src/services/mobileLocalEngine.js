@@ -1,23 +1,50 @@
 import { CapacitorHttp } from '@capacitor/core';
 import { sortClientItems, tryConvertXtreamToHls } from '../utils/format.js';
+import { mobilePlaylistStore } from './mobilePlaylistStore.js';
 
 /**
  * Motor Mobile Autônomo (Standalone) para rodar 100% no celular (Android/iOS Capacitor)
  * quando não houver servidor MahatTV Desktop configurado na rede local.
- * Inclui parser M3U8, persistência local e Verificador de Canais Ao Vivo (Scanner) nativo.
+ * - Armazena TODAS as listas (.m3u8) do repositório no IndexedDB (sem limite de 5 MB do localStorage)
+ * - Sincronização real com GitHub (Ramys/Iptv-Brasil-2026) com progresso em tempo real e comparação de SHA
+ * - Verificador de Canais Ao Vivo (Scanner) nativo via CapacitorHttp
  */
-const REMOTE_BASE = 'https://raw.githubusercontent.com/Ramys/Iptv-Brasil-2026/master';
-const MOBILE_PLAYLISTS = [
-  { name: 'CanaisBR03.m3u8', sizeMB: '0.01' },
-  { name: 'Canais.m3u8', sizeMB: '0.15' },
-  { name: 'CanaisBR02.m3u8', sizeMB: '0.28' }
-];
-const VERIFIED_STORAGE_KEY = 'mahattv_mobile_verified_v1';
+const GITHUB_OWNER = 'Ramys';
+const GITHUB_REPO = 'Iptv-Brasil-2026';
+const GITHUB_BRANCH = 'master';
+const GITHUB_REPO_URL = `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}.git`;
+const REMOTE_BASE = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}`;
 
-const cache = new Map();
+const BR_LIVE_LISTS = ['CanaisBR03.m3u8', 'Canais.m3u8', 'CanaisBR02.m3u8', 'CanaisBR04.m3u8'];
+const ALL_LIVE_LISTS = ['CanaisBR03.m3u8', 'Canais.m3u8', 'CanaisBR02.m3u8', 'CanaisBR04.m3u8', 'CanaisIPTV.m3u8'];
+
+// Lista de fallback caso a API do GitHub atinja rate-limit temporário
+const FALLBACK_REPO_FILES = [
+  { name: 'CanaisBR03.m3u8', remoteSize: 15_000 },
+  { name: 'Canais.m3u8', remoteSize: 150_000 },
+  { name: 'CanaisBR02.m3u8', remoteSize: 280_000 },
+  { name: 'CanaisBR04.m3u8', remoteSize: 750_000 },
+  { name: 'CanaisBR01.m3u8', remoteSize: 1_500_000 },
+  { name: 'CanaisIPTV.m3u8', remoteSize: 4_500_000 },
+  { name: 'Filmes-Series.m3u8', remoteSize: 16_000_000 }
+];
+
+const VERIFIED_STORAGE_KEY = 'mahattv_mobile_verified_v1';
+const MAX_PARSED_CACHE = 4;
+
+const cache = new Map(); // LRU de listas já parseadas em memória
 const verifiedMap = new Map(); // url -> { url, status, checkedAt, statusCode, reason, item }
 let seedLoadedPromise = null;
 let seededFavorites = [];
+
+function setParsedCache(name, parsed) {
+  if (cache.has(name)) cache.delete(name);
+  cache.set(name, parsed);
+  while (cache.size > MAX_PARSED_CACHE) {
+    const oldestKey = cache.keys().next().value;
+    cache.delete(oldestKey);
+  }
+}
 
 function loadVerifiedFromStorage() {
   try {
@@ -81,7 +108,6 @@ function saveVerifiedToStorage(immediate = false) {
       const compact = Array.from(verifiedMap.values()).slice(-2000);
       localStorage.setItem(VERIFIED_STORAGE_KEY, JSON.stringify(compact));
     } catch {
-      // Se atingir cota do localStorage, salva apenas os canais online
       try {
         const onlyOnline = Array.from(verifiedMap.values()).filter((e) => e.status === 'online');
         localStorage.setItem(VERIFIED_STORAGE_KEY, JSON.stringify(onlyOnline));
@@ -91,11 +117,281 @@ function saveVerifiedToStorage(immediate = false) {
     }
   };
   if (immediate) persist();
-  else saveTimer = setTimeout(persist, 1200);
+  else saveTimer = setTimeout(persist, 2000);
 }
 
 loadVerifiedFromStorage();
 
+// =========================================================
+// SINCRONIZAÇÃO COMPLETA COM O REPOSITÓRIO GITHUB
+// =========================================================
+const githubSyncState = {
+  repoUrl: GITHUB_REPO_URL,
+  checking: false,
+  updating: false,
+  needsUpdate: false,
+  outdatedCount: 0,
+  totalRemoteFiles: 0,
+  lastCheckedAt: null,
+  lastCommitDate: null,
+  lastCommitMessage: null,
+  lastCommitSha: null,
+  error: null,
+  updateProgress: {
+    currentFile: '',
+    completedFiles: 0,
+    totalFiles: 0,
+    bytesDownloaded: 0,
+    totalBytes: 0
+  },
+  files: []
+};
+
+async function fetchJsonWithFallback(url, timeoutMs = 12000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, {
+      headers: { Accept: 'application/vnd.github.v3+json' },
+      signal: controller.signal
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (fetchErr) {
+    if (CapacitorHttp && typeof CapacitorHttp.get === 'function') {
+      const res = await CapacitorHttp.get({
+        url,
+        headers: {
+          'User-Agent': 'MahatTV-Glass-Stream-Player',
+          Accept: 'application/vnd.github.v3+json'
+        },
+        connectTimeout: timeoutMs,
+        readTimeout: timeoutMs
+      });
+      if (res.status >= 200 && res.status < 300) {
+        return typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
+      }
+      throw new Error(`HTTP ${res.status}`);
+    }
+    throw fetchErr;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function downloadTextWithProgress(url, onBytes, timeoutMs = 45000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    if (res.body && typeof res.body.getReader === 'function') {
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      const chunks = [];
+      let totalBytes = 0;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (value) {
+          totalBytes += value.byteLength;
+          if (onBytes) onBytes(value.byteLength);
+          chunks.push(decoder.decode(value, { stream: true }));
+        }
+      }
+      chunks.push(decoder.decode());
+      return { text: chunks.join(''), byteLength: totalBytes };
+    }
+
+    const text = await res.text();
+    if (onBytes) onBytes(text.length);
+    return { text, byteLength: text.length };
+  } catch (fetchErr) {
+    if (CapacitorHttp && typeof CapacitorHttp.get === 'function') {
+      const res = await CapacitorHttp.get({
+        url,
+        headers: { 'User-Agent': 'MahatTV/2.2' },
+        connectTimeout: timeoutMs,
+        readTimeout: timeoutMs,
+        responseType: 'text'
+      });
+      if (res.status >= 200 && res.status < 300) {
+        const text = typeof res.data === 'string' ? res.data : String(res.data || '');
+        if (onBytes) onBytes(text.length);
+        return { text, byteLength: text.length };
+      }
+      throw new Error(`HTTP ${res.status}`);
+    }
+    throw fetchErr;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function recomputeGithubStatusesFromLocal(remoteList) {
+  const localMetaList = await mobilePlaylistStore.listMeta();
+  const localByName = new Map(localMetaList.map((m) => [m.name, m]));
+
+  const fileStatuses = [];
+  let outdatedCount = 0;
+
+  for (const remote of remoteList) {
+    const local = localByName.get(remote.name);
+    let status = 'up_to_date';
+    if (!local) {
+      status = 'missing_local';
+      outdatedCount++;
+    } else if (remote.sha && local.sha && local.sha !== remote.sha) {
+      status = 'outdated';
+      outdatedCount++;
+    }
+
+    const remoteSize = remote.size || remote.remoteSize || 0;
+    fileStatuses.push({
+      name: remote.name,
+      remoteSize,
+      remoteSizeMB: (remoteSize / (1024 * 1024)).toFixed(2),
+      remoteSha: remote.sha || remote.remoteSha || '',
+      localSize: local ? local.size : 0,
+      localSha: local ? local.sha : null,
+      status,
+      downloadUrl:
+        remote.download_url ||
+        remote.downloadUrl ||
+        `${REMOTE_BASE}/${encodeURIComponent(remote.name)}`
+    });
+  }
+
+  githubSyncState.files = fileStatuses.sort((a, b) => a.remoteSize - b.remoteSize);
+  githubSyncState.totalRemoteFiles = fileStatuses.length;
+  githubSyncState.outdatedCount = outdatedCount;
+  githubSyncState.needsUpdate = outdatedCount > 0;
+}
+
+async function checkGithubUpdatesMobile(force = false) {
+  if (githubSyncState.checking || githubSyncState.updating) {
+    return githubSyncState;
+  }
+
+  // Evita estourar rate-limit da API pública do GitHub durante polling
+  if (!force && githubSyncState.lastCheckedAt && Date.now() - githubSyncState.lastCheckedAt < 10 * 60 * 1000) {
+    if (githubSyncState.files.length) {
+      await recomputeGithubStatusesFromLocal(githubSyncState.files);
+    }
+    return githubSyncState;
+  }
+
+  githubSyncState.checking = true;
+  githubSyncState.error = null;
+
+  try {
+    const [contents, commitInfo] = await Promise.all([
+      fetchJsonWithFallback(
+        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents?ref=${GITHUB_BRANCH}`,
+        12000
+      ),
+      fetchJsonWithFallback(
+        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/commits/${GITHUB_BRANCH}`,
+        10000
+      ).catch(() => null)
+    ]);
+
+    if (commitInfo && commitInfo.commit) {
+      githubSyncState.lastCommitSha = (commitInfo.sha || '').slice(0, 7);
+      githubSyncState.lastCommitDate = commitInfo.commit.committer?.date || commitInfo.commit.author?.date || null;
+      githubSyncState.lastCommitMessage = commitInfo.commit.message || '';
+    }
+
+    const remoteM3u8 = Array.isArray(contents)
+      ? contents.filter((item) => item.type === 'file' && item.name.toLowerCase().endsWith('.m3u8'))
+      : [];
+
+    await recomputeGithubStatusesFromLocal(remoteM3u8.length ? remoteM3u8 : FALLBACK_REPO_FILES);
+    githubSyncState.lastCheckedAt = Date.now();
+  } catch (err) {
+    githubSyncState.error = err?.message || 'Erro ao consultar GitHub';
+    // Fallback: mesmo se a API do GitHub der rate-limit (HTTP 403), usa a lista conhecida via raw.githubusercontent
+    if (!githubSyncState.files.length) {
+      await recomputeGithubStatusesFromLocal(FALLBACK_REPO_FILES);
+    }
+    githubSyncState.lastCheckedAt = Date.now();
+  } finally {
+    githubSyncState.checking = false;
+  }
+
+  return githubSyncState;
+}
+
+async function pullGithubUpdatesMobile(options = {}) {
+  if (githubSyncState.updating) return githubSyncState;
+
+  const { forceAll = false, targetFile = null } = options || {};
+
+  if (!githubSyncState.files.length) {
+    await checkGithubUpdatesMobile(true);
+  }
+
+  const toDownload = githubSyncState.files.filter((f) => {
+    if (targetFile) return f.name === targetFile;
+    if (forceAll) return true;
+    return f.status === 'outdated' || f.status === 'missing_local';
+  });
+
+  if (!toDownload.length) {
+    return githubSyncState;
+  }
+
+  githubSyncState.updating = true;
+  githubSyncState.error = null;
+  githubSyncState.updateProgress = {
+    currentFile: toDownload[0].name,
+    completedFiles: 0,
+    totalFiles: toDownload.length,
+    bytesDownloaded: 0,
+    totalBytes: toDownload.reduce((acc, f) => acc + (f.remoteSize || 0), 0)
+  };
+
+  (async () => {
+    try {
+      for (const fileInfo of toDownload) {
+        githubSyncState.updateProgress.currentFile = fileInfo.name;
+        const { text, byteLength } = await downloadTextWithProgress(
+          fileInfo.downloadUrl,
+          (chunkBytes) => {
+            githubSyncState.updateProgress.bytesDownloaded += chunkBytes;
+          },
+          60000
+        );
+
+        await mobilePlaylistStore.savePlaylist({
+          name: fileInfo.name,
+          sha: fileInfo.remoteSha || null,
+          size: byteLength || fileInfo.remoteSize || text.length,
+          text
+        });
+
+        cache.delete(fileInfo.name);
+        githubSyncState.updateProgress.completedFiles++;
+      }
+    } catch (err) {
+      githubSyncState.error = `Erro ao baixar lista: ${err?.message || 'falha de rede'}`;
+    } finally {
+      await recomputeGithubStatusesFromLocal(
+        githubSyncState.files.length ? githubSyncState.files : FALLBACK_REPO_FILES
+      );
+      githubSyncState.updateProgress.currentFile = '';
+      githubSyncState.updating = false;
+    }
+  })();
+
+  return githubSyncState;
+}
+
+// =========================================================
+// SCANNER & PARSER DE PLAYLISTS
+// =========================================================
 const scannerState = {
   running: false,
   stopRequested: false,
@@ -151,36 +447,62 @@ function detectType(url) {
   return 'ts';
 }
 
+function extractAttr(line, attr) {
+  const key = `${attr}="`;
+  let idx = line.indexOf(key);
+  if (idx === -1) {
+    idx = line.toLowerCase().indexOf(key);
+    if (idx === -1) return '';
+  }
+  const start = idx + key.length;
+  const end = line.indexOf('"', start);
+  return end === -1 ? '' : line.slice(start, end).trim();
+}
+
 function parseExtInf(line) {
   const commaIdx = line.lastIndexOf(',');
   const name = commaIdx !== -1 ? line.slice(commaIdx + 1).trim() : '';
-  const getAttr = (attr) => {
-    const m = line.match(new RegExp(`${attr}="([^"]*)"`, 'i'));
-    return m ? m[1].trim() : '';
-  };
   return {
-    name: name || getAttr('tvg-name') || 'Canal',
-    logo: getAttr('tvg-logo'),
-    group: getAttr('group-title') || 'Canais Ao Vivo',
-    tvgId: getAttr('tvg-id')
+    name: name || extractAttr(line, 'tvg-name') || 'Canal',
+    logo: extractAttr(line, 'tvg-logo'),
+    group: extractAttr(line, 'group-title') || 'Canais Ao Vivo',
+    tvgId: extractAttr(line, 'tvg-id')
   };
 }
 
+/**
+ * Parser M3U8 de baixa memória (sem .split() gigante para listas de 15+ MB como Filmes-Series.m3u8)
+ */
 function parseM3u8Text(text, fileName) {
-  const lines = String(text || '').split(/\r?\n/);
+  const src = String(text || '');
+  const len = src.length;
   const items = [];
   const categories = new Map();
+  let liveCount = 0;
   let meta = null;
+  let pos = 0;
 
-  for (const raw of lines) {
-    const line = raw.trim();
+  while (pos < len) {
+    let nl = src.indexOf('\n', pos);
+    if (nl === -1) nl = len;
+    let end = nl;
+    if (end > pos && src.charCodeAt(end - 1) === 13) end--;
+    const line = src.slice(pos, end).trim();
+    pos = nl + 1;
+
     if (!line) continue;
-    if (line.startsWith('#EXTINF:')) {
-      meta = parseExtInf(line);
-    } else if (!line.startsWith('#') && /^https?:\/\//i.test(line)) {
+    if (line.charCodeAt(0) === 35) {
+      if (line.startsWith('#EXTINF:')) {
+        meta = parseExtInf(line);
+      }
+      continue;
+    }
+
+    if (line.startsWith('http://') || line.startsWith('https://')) {
       const m = meta || { name: `Canal #${items.length + 1}`, logo: '', group: 'Canais Ao Vivo', tvgId: '' };
       const type = detectType(line);
       const isLive = type !== 'mp4';
+      if (isLive) liveCount++;
       items.push({
         id: `${fileName}:${items.length}`,
         name: m.name,
@@ -197,37 +519,8 @@ function parseM3u8Text(text, fileName) {
       meta = null;
     }
   }
-  return { items, categories };
-}
 
-async function nativeTextGet(url, timeoutMs = 12000) {
-  try {
-    if (CapacitorHttp && typeof CapacitorHttp.get === 'function') {
-      const res = await CapacitorHttp.get({
-        url,
-        headers: { 'User-Agent': 'MahatTV/2.2' },
-        connectTimeout: timeoutMs,
-        readTimeout: timeoutMs,
-        responseType: 'text'
-      });
-      if (res.status >= 200 && res.status < 300) {
-        return typeof res.data === 'string' ? res.data : JSON.stringify(res.data || '');
-      }
-      throw new Error(`HTTP ${res.status}`);
-    }
-  } catch {
-    // Fallback para fetch padrão
-  }
-
-  const controller = new AbortController();
-  const t = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const res = await fetch(url, { signal: controller.signal });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.text();
-  } finally {
-    clearTimeout(t);
-  }
+  return { items, liveCount, categories };
 }
 
 async function ensurePlaylistLoaded(fileName) {
@@ -242,14 +535,17 @@ async function ensurePlaylistLoaded(fileName) {
         categories.set(it.group, (categories.get(it.group) || 0) + 1);
       }
     }
-    return { items, categories };
+    return { items, liveCount: items.length, categories };
   }
 
   if (fileName === '__LIVE_BR__' || fileName === '__ALL_LIVE__' || fileName === '__ALL__') {
+    const targetListNames = fileName === '__LIVE_BR__' ? BR_LIVE_LISTS : ALL_LIVE_LISTS;
     const items = [];
     const categories = new Map();
     const seen = new Set();
-    const loadedLists = await Promise.all(MOBILE_PLAYLISTS.map((pl) => ensurePlaylistLoaded(pl.name)));
+    const loadedLists = await Promise.all(
+      targetListNames.map((name) => ensurePlaylistLoaded(name).catch(() => ({ items: [] })))
+    );
     for (const data of loadedLists) {
       for (const it of data.items) {
         if (!it.isLive || seen.has(it.url)) continue;
@@ -258,61 +554,46 @@ async function ensurePlaylistLoaded(fileName) {
         categories.set(it.group, (categories.get(it.group) || 0) + 1);
       }
     }
-    return { items, categories };
+    return { items, liveCount: items.length, categories };
   }
 
   if (cache.has(fileName)) return cache.get(fileName);
 
-  const storageKey = `mahattv_mobile_pl_${fileName}`;
-  const cachedText = localStorage.getItem(storageKey) || '';
+  // 1. Tenta carregar instantaneamente do IndexedDB
+  let text = await mobilePlaylistStore.getText(fileName);
 
-  // Stale-while-revalidate: se já houver cache local, entrega instantaneamente e atualiza em segundo plano
-  if (cachedText) {
-    const parsedCached = parseM3u8Text(cachedText, fileName);
-    cache.set(fileName, parsedCached);
-    nativeTextGet(`${REMOTE_BASE}/${encodeURIComponent(fileName)}`, 12000)
-      .then((freshText) => {
-        if (freshText && freshText !== cachedText) {
-          cache.set(fileName, parseM3u8Text(freshText, fileName));
-          try {
-            localStorage.setItem(storageKey, freshText);
-          } catch {
-            // Quota excedida
-          }
-        }
-      })
-      .catch(() => {});
-    return parsedCached;
-  }
-
-  let text = '';
-  try {
-    text = await nativeTextGet(`${REMOTE_BASE}/${encodeURIComponent(fileName)}`, 12000);
-    if (text) {
-      try {
-        localStorage.setItem(storageKey, text);
-      } catch {
-        // Quota excedida
+  // 2. Se ainda não existe localmente, baixa sob demanda do GitHub e salva no IndexedDB
+  if (!text) {
+    try {
+      const ghEntry = githubSyncState.files.find((f) => f.name === fileName);
+      const url = ghEntry?.downloadUrl || `${REMOTE_BASE}/${encodeURIComponent(fileName)}`;
+      const res = await downloadTextWithProgress(url, null, 45000);
+      text = res.text;
+      if (text) {
+        await mobilePlaylistStore.savePlaylist({
+          name: fileName,
+          sha: ghEntry?.remoteSha || null,
+          size: res.byteLength || text.length,
+          text
+        });
       }
+    } catch {
+      text = '';
     }
-  } catch {
-    text = '';
   }
 
   const parsed = parseM3u8Text(text, fileName);
-  cache.set(fileName, parsed);
+  setParsedCache(fileName, parsed);
   return parsed;
 }
 
 /**
- * Testa um canal ao vivo no Android/iOS com segurança (sem travar em streams .ts infinitos!):
- * 1. Para URLs .m3u8 (ou Xtream .ts convertida para .m3u8), faz GET leve do manifesto (~500 bytes).
- * 2. Para demais URLs .ts, usa HEAD (lê apenas cabeçalhos HTTP sem baixar fluxo infinito) com timeout curto.
+ * Testa um canal ao vivo no Android/iOS com segurança (sem travar em streams .ts infinitos)
  */
 async function probeUrlNative(url, method = 'HEAD', timeoutMs = 4500) {
   const headers = {
     'User-Agent': 'VLC/3.0.20 LibVLC/3.0.20',
-    'Accept': '*/*'
+    Accept: '*/*'
   };
 
   if (CapacitorHttp && typeof CapacitorHttp.request === 'function') {
@@ -347,7 +628,6 @@ async function checkSingleStreamMobile(streamUrl) {
     ? streamUrl
     : tryConvertXtreamToHls(streamUrl);
 
-  // Tentativa 1: testar manifesto HLS (.m3u8) — resposta finita, super rápida e confiável
   if (hlsCandidate) {
     try {
       const r = await probeUrlNative(hlsCandidate, 'GET', 4500);
@@ -357,25 +637,23 @@ async function checkSingleStreamMobile(streamUrl) {
         }
       }
     } catch {
-      // Segue para fallback HEAD na URL original
+      // Segue para fallback HEAD
     }
   }
 
-  // Tentativa 2: HEAD na URL original (não baixa stream contínuo infinito)
   try {
     const r = await probeUrlNative(streamUrl, 'HEAD', 4500);
     if ((r.code === 200 || r.code === 206) && !r.ct.includes('text/html')) {
       return { online: true, statusCode: r.code, reason: 'HEAD_OK' };
     }
     if (r.code === 405 || r.code === 501) {
-      // Servidor não aceita HEAD: tenta Range mínimo de 2 KB
       try {
         const resRange = await CapacitorHttp.request({
           url: streamUrl,
           method: 'GET',
           headers: {
             'User-Agent': 'VLC/3.0.20 LibVLC/3.0.20',
-            'Range': 'bytes=0-2047'
+            Range: 'bytes=0-2047'
           },
           connectTimeout: 4000,
           readTimeout: 4000,
@@ -402,8 +680,36 @@ export const mobileLocalEngine = {
 
   async getPlaylists() {
     await ensureSeedLoaded();
+    const localMeta = await mobilePlaylistStore.listMeta();
+    const merged = new Map();
+
+    // 1. Listas descobertas do GitHub (ou fallback das 7 listas conhecidas)
+    const remoteSource = githubSyncState.files.length ? githubSyncState.files : FALLBACK_REPO_FILES;
+    for (const f of remoteSource) {
+      const size = f.remoteSize || 0;
+      merged.set(f.name, {
+        name: f.name,
+        size,
+        sizeMB: (size / (1024 * 1024)).toFixed(2),
+        loaded: cache.has(f.name),
+        downloaded: false
+      });
+    }
+
+    // 2. Sobrescreve com metadados reais das listas já baixadas no IndexedDB
+    for (const m of localMeta) {
+      merged.set(m.name, {
+        name: m.name,
+        size: m.size || 0,
+        sizeMB: m.sizeMB || ((m.size || 0) / (1024 * 1024)).toFixed(2),
+        loaded: cache.has(m.name),
+        downloaded: true
+      });
+    }
+
+    const playlists = Array.from(merged.values()).sort((a, b) => a.size - b.size);
     return {
-      playlists: MOBILE_PLAYLISTS.map((p) => ({ ...p, loaded: cache.has(p.name) })),
+      playlists,
       scanner: getScannerSummary()
     };
   },
@@ -417,7 +723,7 @@ export const mobileLocalEngine = {
     return {
       playlist: playlistName,
       totalItems: data.items.length,
-      liveCount: data.items.length,
+      liveCount: typeof data.liveCount === 'number' ? data.liveCount : data.items.length,
       categories,
       scanner: getScannerSummary()
     };
@@ -425,7 +731,7 @@ export const mobileLocalEngine = {
 
   async getItems(params) {
     await ensureSeedLoaded();
-    const data = await ensurePlaylistLoaded(params.playlist || '__LIVE_BR__');
+    const data = await ensurePlaylistLoaded(params.playlist || '__ONLINE__');
     let list = data.items.map((it) => {
       const v = verifiedMap.get(it.url);
       return {
@@ -460,7 +766,7 @@ export const mobileLocalEngine = {
     }
 
     const page = Math.max(1, parseInt(params.page || '1', 10));
-    const limit = Math.max(1, parseInt(params.limit || '60', 10));
+    const limit = Math.max(1, parseInt(params.limit || '30', 10));
     const total = list.length;
     const totalPages = Math.max(1, Math.ceil(total / limit));
     const start = (page - 1) * limit;
@@ -508,10 +814,7 @@ export const mobileLocalEngine = {
 
     (async () => {
       try {
-        // Mapear listas grandes que não existem no standalone para __LIVE_BR__
-        const safeScope =
-          playlist === 'CanaisBR02.m3u8' || playlist === 'CanaisBR04.m3u8' ? '__LIVE_BR__' : playlist;
-        const data = await ensurePlaylistLoaded(safeScope);
+        const data = await ensurePlaylistLoaded(playlist);
         let candidates = data.items.filter((it) => it.isLive);
 
         if (category !== 'ALL') {
@@ -699,14 +1002,11 @@ export const mobileLocalEngine = {
     return { matched: false, current: null, upcoming: [] };
   },
 
-  async getGithubStatus() {
-    return {
-      checking: false,
-      updating: false,
-      needsUpdate: false,
-      outdatedCount: 0,
-      files: [],
-      lastCheckedAt: Date.now()
-    };
+  async getGithubStatus(force = false) {
+    return checkGithubUpdatesMobile(force);
+  },
+
+  async triggerGithubUpdate(options = {}) {
+    return pullGithubUpdatesMobile(options);
   }
 };
